@@ -1,9 +1,9 @@
 {% extends 'mlb_app/base.html' %}
 {% load static %}
 
-{% block title %}球員 {{ player_id }} 統計數據 - MLB 統計查詢系統{% endblock %}
+{% block title %}{{ player_name|default:player_id }} - 統計數據 - MLB 統計查詢系統{% endblock %}
 
-{% block description %}查看球員 {{ player_id }} 的詳細統計數據，包含打擊、投球、守備等各項表現分析。{% endblock %}
+{% block description %}查看球員 {{ player_name|default:player_id }} (ID: {{ player_id }}) 的詳細統計數據，包含打擊、投球、守備等各項表現分析。{% endblock %}
 
 {% block content %}
 <!-- Page Header -->
@@ -11,10 +11,10 @@
     <div class="flex flex-wrap justify-between items-center gap-4">
         <div>
             <h1 class="text-[#0d141c] tracking-light text-[32px] font-bold leading-tight">
-                球員統計數據
+                {{ player_name|default:player_id }}
             </h1>
             <p class="text-[#49739c] text-lg leading-relaxed">
-                球員 ID: {{ player_id }} 的詳細統計分析
+                {{ player_name|default:player_id }} (ID: {{ player_id }}) - 詳細統計分析
             </p>
         </div>
         
@@ -389,7 +389,7 @@ function exportTable() {
     const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
     const downloadLink = document.createElement('a');
     
-    downloadLink.download = `player_${"{{ player_id }}"}_stats.csv`;
+    downloadLink.download = `player_${"{{ player_name|escapejs }}"}_${"{{ player_id }}"}_stats.csv`;
     downloadLink.href = window.URL.createObjectURL(csvFile);
     downloadLink.style.display = 'none';
     

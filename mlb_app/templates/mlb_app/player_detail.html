@@ -1,9 +1,9 @@
 {% extends 'mlb_app/base.html' %}
 {% load static %}
 
-{% block title %}{{ player_basic_info.name }} - 球員詳細資訊 - MLB 統計查詢系統{% endblock %}
+{% block title %}{{ player_info.fullName|default:player_id }} - 球員詳細資訊 - MLB 統計查詢系統{% endblock %}
 
-{% block description %}查看 {{ player_basic_info.name }} 的詳細資料、統計數據、職業生涯表現和最新消息。{% endblock %}
+{% block description %}查看 {{ player_info.fullName|default:player_id }} 的詳細資料、統計數據、職業生涯表現和最新消息。{% endblock %}
 
 {% block content %}
 <!-- Player Header -->
@@ -19,14 +19,26 @@
             
             <!-- Player Info -->
             <div class="flex-1">
-                <h1 class="text-3xl font-bold mb-2">{{ player_basic_info.name }}</h1>
+                <h1 class="text-3xl font-bold mb-2">{{ player_info.fullName|default:player_id }}</h1>
                 <div class="flex flex-wrap items-center gap-4 text-lg opacity-90">
                     <span class="flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
                             <path d="M117.25,157.92a60,60,0,1,0-66.5,0A95.83,95.83,0,0,0,3.53,195.63a8,8,0,1,0,13.4,8.74,80,80,0,0,1,134.14,0,8,8,0,0,0,13.4-8.74A95.83,95.83,0,0,0,117.25,157.92ZM40,108a44,44,0,1,1,44,44A44.05,44.05,0,0,1,40,108Zm210.07,87.63a8,8,0,0,1-5.07,10.1,8.07,8.07,0,0,1-2.53.4,8,8,0,0,1-7.57-5.47,80,80,0,0,0-134.14,0,8,8,0,0,1-13.4-8.74,95.83,95.83,0,0,1,47.22-37.71,60,60,0,1,1,66.5,0A95.83,95.83,0,0,1,250.07,195.63ZM172,108a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,108Z"></path>
                         </svg>
-                        球員 ID: {{ player_id }}
+                        球員 ID: {{ player_info.id|default:player_id }}
                     </span>
+                    {% if player_info.primaryPosition %}
+                    <span class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM112,168a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Zm48,0a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Z"></path></svg>
+                        位置: {{ player_info.primaryPosition }}
+                    </span>
+                    {% endif %}
+                    {% if player_info.currentTeam %}
+                    <span class="flex items-center gap-2">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm56-88a56,56,0,1,1-56-56A56.06,56.06,0,0,1,184,128Z"></path></svg>
+                        球隊: {{ player_info.currentTeam }}
+                    </span>
+                    {% endif %}
                 </div>
             </div>
             
@@ -79,9 +91,39 @@
                         <div class="space-y-3 text-sm">
                             <div class="flex justify-between">
                                 <span class="text-[#49739c]">MLB ID:</span>
-                                <span class="font-medium text-[#0d141c]">{{ player_id }}</span>
+                                <span class="font-medium text-[#0d141c]">{{ player_info.id|default:player_id }}</span>
                             </div>
+                            {% if player_info.birthDate %}
                             <div class="flex justify-between">
+                                <span class="text-[#49739c]">生日:</span>
+                                <span class="font-medium text-[#0d141c]">{{ player_info.birthDate }}</span>
+                            </div>
+                            {% endif %}
+                            {% if player_info.height %}
+                            <div class="flex justify-between">
+                                <span class="text-[#49739c]">身高:</span>
+                                <span class="font-medium text-[#0d141c]">{{ player_info.height }}</span>
+                            </div>
+                            {% endif %}
+                            {% if player_info.weight %}
+                            <div class="flex justify-between">
+                                <span class="text-[#49739c]">體重:</span>
+                                <span class="font-medium text-[#0d141c]">{{ player_info.weight }}</span>
+                            </div>
+                            {% endif %}
+                            {% if player_info.batSide and player_info.batSide != 'N/A' %}
+                            <div class="flex justify-between">
+                                <span class="text-[#49739c]">打擊習慣:</span>
+                                <span class="font-medium text-[#0d141c]">{{ player_info.batSide }}</span>
+                            </div>
+                            {% endif %}
+                            {% if player_info.pitchHand and player_info.pitchHand != 'N/A' %}
+                            <div class="flex justify-between">
+                                <span class="text-[#49739c]">投球習慣:</span>
+                                <span class="font-medium text-[#0d141c]">{{ player_info.pitchHand }}</span>
+                            </div>
+                            {% endif %}
+                             <div class="flex justify-between">
                                 <span class="text-[#49739c]">狀態:</span>
                                 <span class="font-medium text-green-600">現役球員</span>
                             </div>
@@ -100,10 +142,33 @@
                             </svg>
                             快速統計
                         </h3>
-                        <div class="text-center">
-                            <p class="text-[#49739c] text-sm mb-2">本賽季統計數據載入中...</p>
-                            <div class="animate-pulse bg-gray-200 h-20 rounded"></div>
-                        </div>
+                        {% if quick_stats %}
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between"><span class="text-gray-600">賽季:</span> <span class="font-medium">{{ quick_stats.season|default:"-" }}</span></div>
+                                <div class="flex justify-between"><span class="text-gray-600">球隊:</span> <span class="font-medium">{{ quick_stats.team|default:"-" }}</span></div>
+                                {% if quick_stats_type == 'hitting' %}
+                                    <div class="flex justify-between"><span class="text-gray-600">G:</span> <span class="font-medium">{{ quick_stats.gamesPlayed|default:"-" }}</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-600">AB:</span> <span class="font-medium">{{ quick_stats.atBats|default:"-" }}</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-600">R:</span> <span class="font-medium">{{ quick_stats.runs|default:"-" }}</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-600">H:</span> <span class="font-medium">{{ quick_stats.hits|default:"-" }}</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-600">HR:</span> <span class="font-medium">{{ quick_stats.homeRuns|default:"-" }}</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-600">RBI:</span> <span class="font-medium">{{ quick_stats.rbi|default:"-" }}</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-600">AVG:</span> <span class="font-medium">{{ quick_stats.avg|default:"-" }}</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-600">OPS:</span> <span class="font-medium">{{ quick_stats.ops|default:"-" }}</span></div>
+                                {% elif quick_stats_type == 'pitching' %}
+                                    <div class="flex justify-between"><span class="text-gray-600">W:</span> <span class="font-medium">{{ quick_stats.wins|default:"-" }}</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-600">L:</span> <span class="font-medium">{{ quick_stats.losses|default:"-" }}</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-600">ERA:</span> <span class="font-medium">{{ quick_stats.era|default:"-" }}</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-600">G:</span> <span class="font-medium">{{ quick_stats.gamesPitched|default:"-" }}</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-600">GS:</span> <span class="font-medium">{{ quick_stats.gamesStarted|default:"-" }}</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-600">IP:</span> <span class="font-medium">{{ quick_stats.inningsPitched|default:"-" }}</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-600">SO:</span> <span class="font-medium">{{ quick_stats.strikeOuts|default:"-" }}</span></div>
+                                    <div class="flex justify-between"><span class="text-gray-600">WHIP:</span> <span class="font-medium">{{ quick_stats.whip|default:"-" }}</span></div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <p class="text-[#49739c] text-sm">本賽季快速統計資料暫無。</p>
+                        {% endif %}
                     </div>
                 </div>
                 
@@ -111,7 +176,11 @@
                 <div class="mt-6">
                     <h3 class="text-lg font-bold text-[#0d141c] mb-4">近期表現</h3>
                     <div class="bg-gray-50 rounded-lg p-6 text-center">
-                        <p class="text-[#49739c]">載入最新比賽表現數據中...</p>
+                        {% if recent_performance_available %}
+                            <p class="text-[#49739c]">載入最新比賽表現數據中...</p>
+                        {% else %}
+                            <p class="text-[#49739c]">近期比賽表現數據即將推出。</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -121,7 +190,7 @@
                 <div class="mb-6">
                     <h3 class="text-lg font-bold text-[#0d141c] mb-4">打擊統計</h3>
                     
-                    {% if hitting_stats %}
+                    {% if hitting_stats_summary %} {# Updated variable name #}
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm">
                                 <thead>
@@ -138,19 +207,19 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for stat in hitting_stats %}
+                                    {% for stat_item in hitting_stats_summary %} {# Updated variable name #}
                                         <tr class="border-b border-[#e7edf4] hover:bg-gray-50">
                                             <td class="py-3 px-4 text-[#0d141c] font-medium">
-                                                {{ stat.season|default:"目前" }}
+                                                {{ stat_item.season|default:"目前" }}
                                             </td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.gamesPlayed|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.atBats|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.runs|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.hits|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.homeRuns|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.rbi|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ stat.stat.avg|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ stat.stat.ops|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.gamesPlayed|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.atBats|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.runs|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.hits|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.homeRuns|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.rbi|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ stat_item.stat.avg|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ stat_item.stat.ops|default:"-" }}</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -173,7 +242,7 @@
                 <div class="mb-6">
                     <h3 class="text-lg font-bold text-[#0d141c] mb-4">投球統計</h3>
                     
-                    {% if pitching_stats %}
+                    {% if pitching_stats_summary %} {# Updated variable name #}
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm">
                                 <thead>
@@ -190,19 +259,19 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for stat in pitching_stats %}
+                                    {% for stat_item in pitching_stats_summary %} {# Updated variable name #}
                                         <tr class="border-b border-[#e7edf4] hover:bg-gray-50">
                                             <td class="py-3 px-4 text-[#0d141c] font-medium">
-                                                {{ stat.season|default:"目前" }}
+                                                {{ stat_item.season|default:"目前" }}
                                             </td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.gamesPitched|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.gamesStarted|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.wins|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.losses|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ stat.stat.era|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.inningsPitched|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.strikeOuts|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ stat.stat.whip|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.gamesPitched|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.gamesStarted|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.wins|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.losses|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ stat_item.stat.era|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.inningsPitched|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.strikeOuts|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ stat_item.stat.whip|default:"-" }}</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -225,7 +294,7 @@
                 <div class="mb-6">
                     <h3 class="text-lg font-bold text-[#0d141c] mb-4">守備統計</h3>
                     
-                    {% if fielding_stats %}
+                    {% if fielding_stats_summary %} {# Updated variable name #}
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm">
                                 <thead>
@@ -241,18 +310,18 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for stat in fielding_stats %}
+                                    {% for stat_item in fielding_stats_summary %} {# Updated variable name #}
                                         <tr class="border-b border-[#e7edf4] hover:bg-gray-50">
                                             <td class="py-3 px-4 text-[#0d141c] font-medium">
-                                                {{ stat.season|default:"目前" }}
+                                                {{ stat_item.season|default:"目前" }}
                                             </td>
-                                            <td class="py-3 px-4 text-[#0d141c]">{{ stat.position.abbreviation|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.gamesPlayed|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.chances|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.assists|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.putOuts|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.errors|default:"-" }}</td>
-                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ stat.stat.fielding|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-[#0d141c]">{{ stat_item.position.abbreviation|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.gamesPlayed|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.chances|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.assists|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.putOuts|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat_item.stat.errors|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ stat_item.stat.fielding|default:"-" }}</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -343,8 +412,8 @@ document.addEventListener('DOMContentLoaded', function() {
 function sharePlayer() {
     if (navigator.share) {
         navigator.share({
-            title: '{{ player_basic_info.name }} - MLB 球員資訊',
-            text: '查看 {{ player_basic_info.name }} 的詳細統計數據和表現',
+            title: '{{ player_info.fullName|default:player_id }} - MLB 球員資訊',
+            text: '查看 {{ player_info.fullName|default:player_id }} 的詳細統計數據和表現',
             url: window.location.href
         }).catch(console.error);
     } else {

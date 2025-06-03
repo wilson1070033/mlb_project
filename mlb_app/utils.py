@@ -464,6 +464,46 @@ class MLBAPIClient:
             logger.error(error_msg)
             raise MLBAPIError(error_msg)
     
+    def get_player_info(self, player_id):
+        """
+        獲取指定球員的基本資訊
+
+        參數:
+            player_id (int): 球員的 MLB ID
+
+        回傳:
+            dict: 格式化後的球員資訊，或在找不到時返回 None
+        """
+        cache_key = f"mlb_player_info_{player_id}"
+        cached_data = cache.get(cache_key)
+
+        if cached_data:
+            logger.debug(f"從快取獲取球員資訊: {player_id}")
+            return cached_data
+
+        try:
+            # Initially, try without explicit hydrate to see if default response is sufficient
+            data = self._make_request(f'people/{player_id}')
+
+            if data.get('people') and len(data['people']) > 0:
+                player_data = data['people'][0]
+                formatted_player = self._format_player_data(player_data)
+
+                # Cache for 15 minutes
+                cache.set(cache_key, formatted_player, 900)
+                logger.info(f"獲取並快取球員資訊: {player_id}")
+                return formatted_player
+            else:
+                logger.warning(f"找不到 ID 為 {player_id} 的球員資訊")
+                return None
+        except MLBAPIError as e:
+            logger.error(f"獲取球員 {player_id} 資訊時發生 API 錯誤: {str(e)}")
+            raise # Re-raise the error to be handled by the caller
+        except Exception as e:
+            error_msg = f"處理球員 {player_id} 資訊時發生未預期錯誤: {str(e)}"
+            logger.error(error_msg)
+            raise MLBAPIError(error_msg)
+
     def _format_player_data(self, player_data):
         """
         格式化球員數據的內部方法
