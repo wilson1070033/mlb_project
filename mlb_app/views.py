@@ -281,36 +281,74 @@ def player_detail(request, player_id):
     """
     context = {
         'player_id': player_id,
+        'quick_stats': None,
+        'quick_stats_type': None,
+        'recent_performance_available': False, # Placeholder for future implementation
     }
-    
+
     try:
-        # 首先嘗試搜尋球員基本資訊
-        # 由於我們只有 ID，需要通過 API 獲取球員資訊
-        player_stats = mlb_api.get_player_stats(player_id, 'hitting', 'season')
-        
-        if not player_stats:
-            raise Http404("找不到該球員的資訊")
-        
-        # 從統計數據中提取球員基本資訊（這是一個臨時方案）
-        # 理想情況下應該有專門的 API 端點獲取球員基本資訊
-        context['player_basic_info'] = {
-            'id': player_id,
-            'name': f"球員 {player_id}",  # 臨時顯示，實際應該從 API 獲取
-        }
-        
-        # 獲取不同類型的統計數據
-        hitting_stats = mlb_api.get_player_stats(player_id, 'hitting', 'season')
-        pitching_stats = mlb_api.get_player_stats(player_id, 'pitching', 'season')
-        fielding_stats = mlb_api.get_player_stats(player_id, 'fielding', 'season')
-        
-        context.update({
-            'hitting_stats': hitting_stats,
-            'pitching_stats': pitching_stats,
-            'fielding_stats': fielding_stats,
-            'page_title': f'球員 {player_id} 詳細資訊',
-        })
-        
-        logger.info(f"載入球員 {player_id} 的詳細資訊")
+        # 1. Fetch Full Player Info
+        player_info = mlb_api.get_player_info(player_id)
+        if not player_info:
+            logger.warning(f"Player info not found for ID {player_id} in player_detail view.")
+            raise Http404("找不到該球員的詳細資訊 (Info)")
+
+        context['player_info'] = player_info
+        context['page_title'] = f"{player_info.get('fullName', player_id)} 詳細資訊"
+
+        # 2. Fetch Stats for Quick Stats and other sections
+        # We fetch both hitting and pitching for the latest season to determine quick stats
+        # Use current year for season stats by default for quick_stats
+        current_year = str(timezone.now().year)
+        hitting_stats_season = mlb_api.get_player_stats(player_id, 'hitting', 'season', season=current_year)
+        pitching_stats_season = mlb_api.get_player_stats(player_id, 'pitching', 'season', season=current_year)
+
+        # Prepare "Quick Stats" Data
+        if hitting_stats_season and hitting_stats_season[0].get('stat'):
+            hs = hitting_stats_season[0]['stat']
+            # Check for meaningful hitting activity, e.g. more than 10 ABs or some hits/HRs
+            if hs.get('atBats', 0) > 10 or hs.get('hits', 0) > 0 or hs.get('homeRuns', 0) > 0:
+                context['quick_stats'] = {
+                    'season': hitting_stats_season[0].get('season', current_year),
+                    'team': hitting_stats_season[0].get('team', {}).get('name', 'N/A'),
+                    'gamesPlayed': hs.get('gamesPlayed'),
+                    'atBats': hs.get('atBats'),
+                    'runs': hs.get('runs'),
+                    'hits': hs.get('hits'),
+                    'homeRuns': hs.get('homeRuns'),
+                    'rbi': hs.get('rbi'),
+                    'avg': format_stat_value(hs.get('avg'), 'avg'), # Use formatter
+                    'ops': format_stat_value(hs.get('ops'), 'ops'), # Use formatter
+                }
+                context['quick_stats_type'] = 'hitting'
+
+        if context['quick_stats_type'] is None and pitching_stats_season and pitching_stats_season[0].get('stat'):
+            ps = pitching_stats_season[0]['stat']
+            # Check for meaningful pitching activity, e.g., has pitched some innings or games
+            if ps.get('inningsPitched', "0.0") != "0.0" or ps.get('gamesPitched', 0) > 0 :
+                context['quick_stats'] = {
+                    'season': pitching_stats_season[0].get('season', current_year),
+                    'team': pitching_stats_season[0].get('team', {}).get('name', 'N/A'),
+                    'wins': ps.get('wins'),
+                    'losses': ps.get('losses'),
+                    'era': format_stat_value(ps.get('era'), 'era'), # Use formatter
+                    'gamesPitched': ps.get('gamesPitched'),
+                    'gamesStarted': ps.get('gamesStarted'),
+                    'inningsPitched': ps.get('inningsPitched'),
+                    'strikeOuts': ps.get('strikeOuts'),
+                    'whip': format_stat_value(ps.get('whip'), 'whip'), # Use formatter
+                }
+                context['quick_stats_type'] = 'pitching'
+
+        # For other parts of the page, you might want career stats or allow user to select
+        # For now, let's fetch general hitting/pitching/fielding stats (yearByYear or career as default)
+        # These are illustrative; the player_stats view already handles detailed stat fetching.
+        # This view's primary purpose is the overview.
+        context['hitting_stats_summary'] = mlb_api.get_player_stats(player_id, 'hitting', 'yearByYear')
+        context['pitching_stats_summary'] = mlb_api.get_player_stats(player_id, 'pitching', 'yearByYear')
+        context['fielding_stats_summary'] = mlb_api.get_player_stats(player_id, 'fielding', 'yearByYear')
+
+        logger.info(f"載入球員 {player_id} ({player_info.get('fullName', 'N/A')}) 的詳細資訊")
         
     except MLBAPIError as e:
         logger.error(f"獲取球員詳細資訊時發生 API 錯誤: {str(e)}")
@@ -356,11 +394,22 @@ def player_stats(request, player_id):
         'stat_group': stat_group,
         'stat_type': stat_type,
         'season': season,
-        'page_title': f'球員 {player_id} 統計數據',
+        # page_title will be updated after fetching player_info
     }
-    
+
     try:
-        # 獲取統計數據
+        # 1. Fetch Full Player Info
+        player_info = mlb_api.get_player_info(player_id)
+        if not player_info:
+            logger.warning(f"Player info not found for ID {player_id} in player_stats view.")
+            raise Http404("找不到該球員的詳細資訊 (Info)")
+
+        player_name = player_info.get('fullName', str(player_id))
+        context['player_info'] = player_info
+        context['player_name'] = player_name
+        context['page_title'] = f'{player_name} 統計數據'
+
+        # 2. 獲取統計數據
         stats = mlb_api.get_player_stats(player_id, stat_group, stat_type, season)
         
         # 格式化統計數據以便在模板中使用
