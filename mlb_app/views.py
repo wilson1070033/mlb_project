@@ -27,12 +27,14 @@ from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils import timezone
 from django.db.models import Q
+from django.contrib.auth import login # Added for registration
 import json
 import logging
 from datetime import datetime, timedelta
 
 from .models import Player, Team, GameLog, SearchHistory
 from .utils import mlb_api, MLBAPIError, get_today_games, get_popular_players, format_stat_value
+from .forms import UserRegisterForm # Added for registration
 
 # 設定日誌記錄器
 logger = logging.getLogger(__name__)
@@ -555,6 +557,26 @@ def api_player_search_json(request):
             'success': False,
             'error': '服務器內部錯誤'
         }, status=500)
+
+
+def register_request(request):
+    if request.method == "POST":
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, "Registration successful." )
+            return redirect("mlb_app:index") # Assuming 'index' is the name of your homepage URL
+        else:
+            # Construct messages for each error
+            # error_message = "Unsuccessful registration. Invalid information." # General message
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field.capitalize()}: {error}")
+            # messages.error(request, error_message)
+    else:
+        form = UserRegisterForm()
+    return render(request=request, template_name="mlb_app/register.html", context={"form":form, "page_title": "用戶註冊"})
 
 
 def get_client_ip(request):

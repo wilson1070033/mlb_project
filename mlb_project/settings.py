@@ -213,3 +213,7 @@ CACHES = {
         'TIMEOUT': 300,  # 5 分鐘快取
     }
 }
+
+# Django Auth Redirect Settings
+LOGIN_REDIRECT_URL = '/'  # Redirect to home page after login
+LOGOUT_REDIRECT_URL = '/' # Redirect to home page after logout

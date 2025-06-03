@@ -1,0 +1,90 @@
+{% extends 'mlb_app/base.html' %}
+
+{% block title %}
+用戶註冊 - MLB 統計查詢系統
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
+        <div class="md:flex">
+            <div class="p-8 w-full">
+                <h2 class="text-2xl font-bold text-center text-[#0d141c] mb-6">建立您的帳戶</h2>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="p-4 mb-4 text-sm rounded-lg
+                            {% if message.tags == 'success' %} bg-green-100 text-green-700 {% endif %}
+                            {% if message.tags == 'error' %} bg-red-100 text-red-700 {% endif %}"
+                             role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                        <div class="mb-4">
+                            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <p class="mt-1 text-xs text-gray-500">{{ field.help_text|safe }}</p>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+                    <div>
+                        <button type="submit"
+                                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            註冊
+                        </button>
+                    </div>
+                </form>
+                <p class="mt-6 text-center text-sm text-gray-600">
+                    已經有帳戶了？
+                    <a href="{% url 'mlb_app:login' %}" class="font-medium text-blue-600 hover:text-blue-500">
+                        點此登入
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Basic styling for form fields to match the project's aesthetic if needed */
+    /* You might want to move this to your main CSS file */
+    form input[type="text"],
+    form input[type="email"],
+    form input[type="password"] {
+        display: block;
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e7edf4; /* Matching border from other elements */
+        border-radius: 0.5rem; /* Matching rounded-xl */
+        background-color: #e7edf4; /* Matching input background */
+        color: #0d141c; /* Matching text color */
+        font-size: 1rem;
+        line-height: 1.5rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    form input[type="text"]:focus,
+    form input[type="email"]:focus,
+    form input[type="password"]:focus {
+        outline: 0;
+        border-color: #3b82f6; /* Blue-600 */
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+    }
+    .form-input ul { /* Styling for password help text */
+        list-style-type: disc;
+        margin-left: 1.5rem;
+        font-size: 0.75rem;
+        color: #4a5568; /* Gray-600 */
+    }
+</style>
+{% endblock %}

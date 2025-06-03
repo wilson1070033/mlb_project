@@ -77,7 +77,7 @@
                 </div>
                 
                 <!-- Header Search and Settings -->
-                <div class="flex flex-1 justify-end gap-8">
+                <div class="flex flex-1 justify-end items-center gap-4"> <!-- Added items-center and reduced gap from 8 to 4 for tighter group -->
                     <!-- Search Box -->
                     <form method="get" action="{% url 'mlb_app:search_players' %}" class="flex">
                         <label class="flex flex-col min-w-40 !h-10 max-w-64">
@@ -107,8 +107,27 @@
                         </svg>
                     </a>
                     {% endif %}
+
+                    <!-- User Authentication Links -->
+                    <div class="flex items-center gap-3"> <!-- Reduced gap for tighter group -->
+                        {% if user.is_authenticated %}
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 hidden md:block">
+                                您好, {{ user.username }}!
+                            </span>
+                            <a href="{% url 'mlb_app:logout' %}" class="text-[#0d141c] text-sm font-medium leading-normal hover:text-blue-600 transition-colors">
+                                登出
+                            </a>
+                        {% else %}
+                            <a href="{% url 'mlb_app:login' %}" class="text-[#0d141c] text-sm font-medium leading-normal hover:text-blue-600 transition-colors {% if request.resolver_match.url_name == 'login' %}text-blue-600 font-bold{% endif %}">
+                                登入
+                            </a>
+                            <a href="{% url 'mlb_app:register' %}" class="text-[#0d141c] text-sm font-medium leading-normal hover:text-blue-600 transition-colors {% if request.resolver_match.url_name == 'register' %}text-blue-600 font-bold{% endif %}">
+                                註冊
+                            </a>
+                        {% endif %}
+                    </div>
                     
-                    <!-- User Avatar or Login -->
+                    <!-- User Avatar or Login Icon Placeholder -->
                     <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 bg-gray-300 flex items-center justify-center">
                         {% if user.is_authenticated %}
                             <span class="text-sm font-bold text-gray-600">{{ user.username|first|upper }}</span>
