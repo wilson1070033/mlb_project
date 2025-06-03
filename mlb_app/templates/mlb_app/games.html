@@ -1,0 +1,360 @@
+{% extends 'mlb_app/base.html' %}
+{% load static %}
+
+{% block title %}{{ date_str }} MLB 比賽資訊 - MLB 統計查詢系統{% endblock %}
+
+{% block description %}查看 {{ date_str }} 的所有 MLB 比賽資訊，包含比賽時間、球隊、比分和比賽狀態。{% endblock %}
+
+{% block content %}
+<!-- Page Header with Date Picker -->
+<div class="flex flex-wrap justify-between gap-3 p-4 mb-6">
+    <div class="flex flex-col gap-2">
+        <h1 class="text-[#0d141c] tracking-light text-[32px] font-bold leading-tight">
+            MLB 比賽資訊
+        </h1>
+        <p class="text-[#49739c] text-lg leading-relaxed">
+            {{ query_date|date:"Y年m月d日 (l)" }} 的比賽安排
+        </p>
+    </div>
+    
+    <!-- Date Navigation -->
+    <div class="flex items-center gap-4">
+        <!-- Previous Day -->
+        <a href="{% url 'mlb_app:games' %}?date={{ query_date|date:'Y-m-d'|add:'-1 day' }}" 
+           class="p-2 text-[#49739c] hover:text-blue-600 transition-colors" 
+           title="前一天">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path>
+            </svg>
+        </a>
+        
+        <!-- Today Button -->
+        <a href="{% url 'mlb_app:games' %}" 
+           class="px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+            今天
+        </a>
+        
+        <!-- Next Day -->
+        <a href="{% url 'mlb_app:games' %}?date={{ query_date|date:'Y-m-d'|add:'1 day' }}" 
+           class="p-2 text-[#49739c] hover:text-blue-600 transition-colors" 
+           title="後一天">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
+            </svg>
+        </a>
+    </div>
+</div>
+
+<!-- Date Picker Section -->
+<div class="p-4 mb-6">
+    <div class="bg-white rounded-xl border border-[#e7edf4] p-4 shadow-sm">
+        <form method="get" action="{% url 'mlb_app:games' %}" class="flex flex-wrap items-center gap-4">
+            <label class="flex items-center gap-2">
+                <span class="text-[#0d141c] text-sm font-medium">選擇日期：</span>
+                <input 
+                    name="date" 
+                    type="date" 
+                    value="{{ date_str }}"
+                    class="px-3 py-2 border border-[#e7edf4] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+            </label>
+            <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                查詢比賽
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Tab Navigation -->
+<div class="pb-3">
+    <div class="flex border-b border-[#cedbe8] px-4 gap-8">
+        <div class="flex flex-col items-center justify-center border-b-[3px] border-b-[#0c7ff2] text-[#0d141c] pb-[13px] pt-4">
+            <p class="text-[#0d141c] text-sm font-bold leading-normal tracking-[0.015em]">
+                {{ query_date|date:"m月d日" }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Games Results -->
+{% if games %}
+    <div class="p-4">
+        <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-[#0d141c] text-[22px] font-bold leading-tight tracking-[-0.015em]">
+                比賽列表
+                <span class="text-[#49739c] text-lg font-normal">({{ total_games }} 場)</span>
+            </h2>
+            
+            <!-- Filter/Sort Options -->
+            <div class="flex items-center gap-2">
+                <button onclick="toggleView()" class="px-3 py-1 text-sm text-[#49739c] hover:text-blue-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M32,64a8,8,0,0,1,8-8H216a8,8,0,0,1,0,16H40A8,8,0,0,1,32,64Zm8,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16Zm176,48H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <div id="games-container" class="space-y-4">
+            {% for game in games %}
+                <div class="game-card bg-white rounded-xl border border-[#e7edf4] shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-stretch justify-between gap-6">
+                            <!-- Game Information -->
+                            <div class="flex-1">
+                                <!-- Teams -->
+                                <div class="mb-4">
+                                    <h3 class="text-[#0d141c] text-lg font-bold leading-tight mb-2">
+                                        {{ game.away_team.name }} vs {{ game.home_team.name }}
+                                    </h3>
+                                    <div class="flex items-center gap-4 text-sm text-[#49739c]">
+                                        <span class="flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                                                <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216ZM128,64a8,8,0,0,1,8,8v48H184a8,8,0,0,1,0,16H128a8,8,0,0,1-8-8V72A8,8,0,0,1,128,64Z"></path>
+                                            </svg>
+                                            {{ game.start_time }}
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                                                <path d="M128,64a40,40,0,1,1,40,40A40,40,0,0,1,128,64Zm0-64A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,0Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,192Z"></path>
+                                            </svg>
+                                            {{ game.status }}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Score Display -->
+                                {% if game.away_team.score != '-' and game.home_team.score != '-' %}
+                                    <div class="flex items-center gap-6 mb-4">
+                                        <!-- Away Team Score -->
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                <span class="text-blue-600 font-bold text-sm">{{ game.away_team.abbreviation }}</span>
+                                            </div>
+                                            <span class="text-2xl font-bold text-[#0d141c]">{{ game.away_team.score }}</span>
+                                        </div>
+                                        
+                                        <span class="text-[#49739c] text-lg">-</span>
+                                        
+                                        <!-- Home Team Score -->
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-2xl font-bold text-[#0d141c]">{{ game.home_team.score }}</span>
+                                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                                <span class="text-green-600 font-bold text-sm">{{ game.home_team.abbreviation }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <!-- No Score - Upcoming Game -->
+                                    <div class="flex items-center gap-6 mb-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                <span class="text-blue-600 font-bold text-sm">{{ game.away_team.abbreviation }}</span>
+                                            </div>
+                                            <span class="text-[#0d141c] font-medium">{{ game.away_team.name }}</span>
+                                        </div>
+                                        
+                                        <span class="text-[#49739c]">vs</span>
+                                        
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-[#0d141c] font-medium">{{ game.home_team.name }}</span>
+                                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                                <span class="text-green-600 font-bold text-sm">{{ game.home_team.abbreviation }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Additional Info -->
+                                {% if game.summary_url %}
+                                    <div class="flex items-center gap-4">
+                                        <a href="{{ game.summary_url }}" target="_blank" 
+                                           class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 transition-colors">
+                                            比賽摘要
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 256 256">
+                                                <path d="M200,64V168a8,8,0,0,1-16,0V83.31L69.66,197.66a8,8,0,0,1-11.32-11.32L172.69,72H88a8,8,0,0,1,0-16H192A8,8,0,0,1,200,64Z"></path>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Game Visual -->
+                            <div class="w-24 h-24 bg-gradient-to-br from-blue-100 to-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256" class="text-blue-600">
+                                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM72,128a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,128Z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+{% else %}
+    <!-- No Games Found -->
+    <div class="p-4">
+        <div class="bg-white rounded-xl border border-[#e7edf4] p-12 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 256 256" class="text-[#49739c] mx-auto mb-6">
+                <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM72,128a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,128Z"></path>
+            </svg>
+            <h3 class="text-[#0d141c] text-xl font-bold mb-4">{{ date_str }} 沒有比賽</h3>
+            <p class="text-[#49739c] mb-6">這一天沒有安排 MLB 比賽，請查看其他日期的比賽安排。</p>
+            <div class="flex justify-center gap-4">
+                <a href="{% url 'mlb_app:games' %}" 
+                   class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    查看今日比賽
+                </a>
+                <button onclick="showDatePicker()" 
+                        class="px-6 py-3 border border-[#e7edf4] text-[#0d141c] rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                    選擇其他日期
+                </button>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Quick Navigation -->
+<div class="p-4 mt-8">
+    <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm">
+        <h3 class="text-[#0d141c] text-lg font-bold mb-4">快速導航</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="{% url 'mlb_app:games' %}?date={{ 'today'|date:'Y-m-d' }}" 
+               class="p-3 text-center border border-[#e7edf4] rounded-lg hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                <div class="text-sm font-medium text-[#0d141c]">今天</div>
+                <div class="text-xs text-[#49739c]">{{ 'today'|date:'m/d' }}</div>
+            </a>
+            <a href="{% url 'mlb_app:games' %}?date={{ 'tomorrow'|date:'Y-m-d' }}" 
+               class="p-3 text-center border border-[#e7edf4] rounded-lg hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                <div class="text-sm font-medium text-[#0d141c]">明天</div>
+                <div class="text-xs text-[#49739c]">{{ 'tomorrow'|date:'m/d' }}</div>
+            </a>
+            <a href="{% url 'mlb_app:search_players' %}" 
+               class="p-3 text-center border border-[#e7edf4] rounded-lg hover:bg-green-50 hover:border-green-200 transition-colors">
+                <div class="text-sm font-medium text-[#0d141c]">球員搜尋</div>
+                <div class="text-xs text-[#49739c]">查找球員</div>
+            </a>
+            <a href="{% url 'mlb_app:index' %}" 
+               class="p-3 text-center border border-[#e7edf4] rounded-lg hover:bg-purple-50 hover:border-purple-200 transition-colors">
+                <div class="text-sm font-medium text-[#0d141c]">返回首頁</div>
+                <div class="text-xs text-[#49739c]">主頁面</div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh for live games
+    const refreshInterval = 30000; // 30 seconds for live games
+    let refreshTimer;
+    
+    function hasLiveGames() {
+        const gameCards = document.querySelectorAll('.game-card');
+        return Array.from(gameCards).some(card => {
+            const statusText = card.querySelector('[title]')?.textContent || '';
+            return statusText.includes('進行中') || statusText.includes('In Progress');
+        });
+    }
+    
+    function startAutoRefresh() {
+        if (hasLiveGames()) {
+            refreshTimer = setInterval(() => {
+                if (!document.hidden) {
+                    // Show loading indicator
+                    showLoading();
+                    
+                    // Reload page to get updated scores
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+            }, refreshInterval);
+        }
+    }
+    
+    function showLoading() {
+        const indicator = document.createElement('div');
+        indicator.className = 'fixed top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2';
+        indicator.innerHTML = `
+            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            <span>更新中...</span>
+        `;
+        document.body.appendChild(indicator);
+        
+        setTimeout(() => {
+            if (indicator.parentNode) {
+                indicator.parentNode.removeChild(indicator);
+            }
+        }, 3000);
+    }
+    
+    // Start auto-refresh if there are live games
+    startAutoRefresh();
+    
+    // Stop auto-refresh when page is hidden
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden && refreshTimer) {
+            clearInterval(refreshTimer);
+        } else if (!document.hidden && hasLiveGames()) {
+            startAutoRefresh();
+        }
+    });
+});
+
+function toggleView() {
+    const container = document.getElementById('games-container');
+    const currentClass = container.className;
+    
+    if (currentClass.includes('space-y-4')) {
+        // Switch to grid view
+        container.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
+    } else {
+        // Switch to list view
+        container.className = 'space-y-4';
+    }
+}
+
+function showDatePicker() {
+    const dateInput = document.querySelector('input[name="date"]');
+    if (dateInput) {
+        dateInput.focus();
+        dateInput.showPicker();
+    }
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Left arrow - previous day
+    if (e.key === 'ArrowLeft' && !e.ctrlKey && !e.metaKey) {
+        const prevLink = document.querySelector('a[title="前一天"]');
+        if (prevLink && !isInputFocused()) {
+            window.location.href = prevLink.href;
+        }
+    }
+    
+    // Right arrow - next day
+    if (e.key === 'ArrowRight' && !e.ctrlKey && !e.metaKey) {
+        const nextLink = document.querySelector('a[title="後一天"]');
+        if (nextLink && !isInputFocused()) {
+            window.location.href = nextLink.href;
+        }
+    }
+    
+    // T key - today
+    if (e.key === 't' || e.key === 'T') {
+        if (!isInputFocused()) {
+            window.location.href = "{% url 'mlb_app:games' %}";
+        }
+    }
+});
+
+function isInputFocused() {
+    const activeElement = document.activeElement;
+    return activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,484 @@
+{% extends 'mlb_app/base.html' %}
+{% load static %}
+
+{% block title %}使用說明 - MLB 統計查詢系統{% endblock %}
+
+{% block description %}詳細的使用說明和常見問題解答，幫助您快速上手 MLB 統計查詢系統，充分利用所有功能特色。{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="p-4 mb-8">
+    <div class="text-center mb-8">
+        <h1 class="text-[#0d141c] tracking-light text-[36px] font-bold leading-tight mb-4">
+            使用說明
+        </h1>
+        <p class="text-[#49739c] text-xl leading-relaxed max-w-3xl mx-auto">
+            快速上手指南，讓您充分利用 MLB 統計查詢系統的所有功能
+        </p>
+    </div>
+</div>
+
+<!-- Quick Start Guide -->
+<div class="p-4 mb-8">
+    <div class="bg-gradient-to-r from-blue-600 to-green-600 rounded-xl text-white p-8">
+        <h2 class="text-2xl font-bold mb-6 text-center">快速開始</h2>
+        <div class="grid gap-6 md:grid-cols-3">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold">1</span>
+                </div>
+                <h3 class="text-lg font-bold mb-2">搜尋球員</h3>
+                <p class="text-sm opacity-90">在搜尋框中輸入球員姓名即可開始查詢</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold">2</span>
+                </div>
+                <h3 class="text-lg font-bold mb-2">查看統計</h3>
+                <p class="text-sm opacity-90">點擊球員卡片查看詳細的統計數據</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold">3</span>
+                </div>
+                <h3 class="text-lg font-bold mb-2">探索比賽</h3>
+                <p class="text-sm opacity-90">使用日期選擇器查看任何日期的比賽資訊</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Features -->
+<div class="p-4 mb-8">
+    <h2 class="text-[#0d141c] text-[28px] font-bold leading-tight mb-8 text-center">主要功能說明</h2>
+    
+    <div class="space-y-8">
+        <!-- Player Search -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] p-8 shadow-sm">
+            <div class="flex items-start gap-6">
+                <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256" class="text-blue-600">
+                        <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-[#0d141c] text-xl font-bold mb-4">🔍 球員搜尋</h3>
+                    <p class="text-[#49739c] mb-4">快速找到任何現役 MLB 球員的詳細資訊和統計數據。</p>
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3">
+                            <div class="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
+                            <div>
+                                <div class="font-medium text-[#0d141c]">輸入球員姓名</div>
+                                <div class="text-sm text-[#49739c]">支援英文全名或部分姓名搜尋，例如 "Ohtani" 或 "Shohei Ohtani"</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
+                            <div>
+                                <div class="font-medium text-[#0d141c]">選擇目標球員</div>
+                                <div class="text-sm text-[#49739c]">從搜尋結果中選擇正確的球員，查看所屬球隊和位置資訊</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
+                            <div>
+                                <div class="font-medium text-[#0d141c]">查看詳細資料</div>
+                                <div class="text-sm text-[#49739c]">點擊「查看詳情」或「統計數據」按鈕進入詳細頁面</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                        <div class="text-sm font-medium text-blue-800 mb-2">💡 搜尋技巧</div>
+                        <div class="text-sm text-blue-700">
+                            • 使用球員的英文姓名獲得最佳結果<br>
+                            • 可以只輸入姓氏或名字進行模糊搜尋<br>
+                            • 系統目前只支援現役球員查詢
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Games Query -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] p-8 shadow-sm">
+            <div class="flex items-start gap-6">
+                <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256" class="text-green-600">
+                        <path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,184a8,8,0,0,1-16,0V168a8,8,0,0,1,16,0Zm0-40a8,8,0,0,1-16,0V112a8,8,0,0,1,16,0Zm48,40a8,8,0,0,1-16,0V136a8,8,0,0,1,16,0Zm0-64a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Zm48,64a8,8,0,0,1-16,0V152a8,8,0,0,1,16,0Zm0-48a8,8,0,0,1-16,0V72a8,8,0,0,1,16,0Zm48,48a8,8,0,0,1-16,0V120a8,8,0,0,1,16,0Z"></path>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-[#0d141c] text-xl font-bold mb-4">📅 比賽查詢</h3>
+                    <p class="text-[#49739c] mb-4">查看任何日期的 MLB 比賽安排、即時比分和結果。</p>
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3">
+                            <div class="w-2 h-2 bg-green-600 rounded-full mt-2"></div>
+                            <div>
+                                <div class="font-medium text-[#0d141c]">選擇查詢日期</div>
+                                <div class="text-sm text-[#49739c]">使用日期選擇器或導航按鈕選擇想查詢的日期</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-2 h-2 bg-green-600 rounded-full mt-2"></div>
+                            <div>
+                                <div class="font-medium text-[#0d141c]">查看比賽狀態</div>
+                                <div class="text-sm text-[#49739c]">系統會顯示預定、進行中、已結束等不同的比賽狀態</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-2 h-2 bg-green-600 rounded-full mt-2"></div>
+                            <div>
+                                <div class="font-medium text-[#0d141c]">即時更新</div>
+                                <div class="text-sm text-[#49739c]">進行中的比賽會自動更新比分和局數資訊</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 bg-green-50 rounded-lg">
+                        <div class="text-sm font-medium text-green-800 mb-2">⚡ 實用功能</div>
+                        <div class="text-sm text-green-700">
+                            • 使用鍵盤左右箭頭快速切換日期<br>
+                            • 點擊「今天」按鈕快速回到當前日期<br>
+                            • 比賽摘要連結可查看更詳細的比賽報告
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] p-8 shadow-sm">
+            <div class="flex items-start gap-6">
+                <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256" class="text-purple-600">
+                        <path d="M232,208a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V48a8,8,0,0,1,16,0V156.69L82.34,114.34a8,8,0,0,1,11.32,0L128,148.69l42.34-42.35a8,8,0,0,1,11.32,0L216,140.69V48a8,8,0,0,1,16,0V208Z"></path>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-[#0d141c] text-xl font-bold mb-4">📊 統計數據分析</h3>
+                    <p class="text-[#49739c] mb-4">深入分析球員的各項統計數據，包含打擊、投球、守備等。</p>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div>
+                            <div class="font-medium text-[#0d141c] mb-2">統計類別</div>
+                            <div class="space-y-1 text-sm text-[#49739c]">
+                                <div>• <strong>打擊統計：</strong>打擊率、全壘打、打點等</div>
+                                <div>• <strong>投球統計：</strong>防禦率、勝負記錄、三振數等</div>
+                                <div>• <strong>守備統計：</strong>守備率、助殺、失誤等</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="font-medium text-[#0d141c] mb-2">時間範圍</div>
+                            <div class="space-y-1 text-sm text-[#49739c]">
+                                <div>• <strong>單季統計：</strong>特定年份的表現</div>
+                                <div>• <strong>生涯統計：</strong>職業生涯總和數據</div>
+                                <div>• <strong>逐年統計：</strong>年度表現比較</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 bg-purple-50 rounded-lg">
+                        <div class="text-sm font-medium text-purple-800 mb-2">📈 數據解讀</div>
+                        <div class="text-sm text-purple-700">
+                            • AVG（打擊率）：安打數 ÷ 打數，越高越好<br>
+                            • ERA（防禦率）：每九局失分，越低越好<br>
+                            • OPS：上壘率 + 長打率，綜合打擊指標
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FAQ Section -->
+<div class="p-4 mb-8">
+    <h2 class="text-[#0d141c] text-[28px] font-bold leading-tight mb-8 text-center">常見問題</h2>
+    
+    <div class="space-y-4">
+        <!-- FAQ Item 1 -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] shadow-sm">
+            <button class="faq-button w-full p-6 text-left focus:outline-none" onclick="toggleFaq(this)">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-[#0d141c] text-lg font-bold">為什麼搜尋不到某些球員？</h3>
+                    <svg class="faq-icon w-5 h-5 text-[#49739c] transform transition-transform" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
+                    </svg>
+                </div>
+            </button>
+            <div class="faq-content hidden px-6 pb-6">
+                <div class="text-[#49739c] space-y-2">
+                    <p>系統目前只支援現役 MLB 球員查詢。如果搜尋不到球員，可能原因包括：</p>
+                    <ul class="list-disc list-inside space-y-1 ml-4">
+                        <li>球員已退休或不是現役球員</li>
+                        <li>球員姓名拼寫錯誤</li>
+                        <li>球員在小聯盟或其他聯盟</li>
+                        <li>使用了非官方的暱稱或簡稱</li>
+                    </ul>
+                    <p>建議使用球員的英文全名進行搜尋，獲得最佳結果。</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FAQ Item 2 -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] shadow-sm">
+            <button class="faq-button w-full p-6 text-left focus:outline-none" onclick="toggleFaq(this)">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-[#0d141c] text-lg font-bold">數據多久更新一次？</h3>
+                    <svg class="faq-icon w-5 h-5 text-[#49739c] transform transition-transform" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
+                    </svg>
+                </div>
+            </button>
+            <div class="faq-content hidden px-6 pb-6">
+                <div class="text-[#49739c] space-y-2">
+                    <p>我們的數據來源是 MLB 官方 API，更新頻率如下：</p>
+                    <ul class="list-disc list-inside space-y-1 ml-4">
+                        <li><strong>比賽進行中：</strong>每 30 秒自動更新比分</li>
+                        <li><strong>球員統計：</strong>比賽結束後幾分鐘內更新</li>
+                        <li><strong>賽程資訊：</strong>每日更新一次</li>
+                        <li><strong>球員基本資料：</strong>每週更新一次</li>
+                    </ul>
+                    <p>如果發現數據異常，請嘗試重新整理頁面或稍後再試。</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FAQ Item 3 -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] shadow-sm">
+            <button class="faq-button w-full p-6 text-left focus:outline-none" onclick="toggleFaq(this)">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-[#0d141c] text-lg font-bold">如何理解各項統計數據？</h3>
+                    <svg class="faq-icon w-5 h-5 text-[#49739c] transform transition-transform" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
+                    </svg>
+                </div>
+            </button>
+            <div class="faq-content hidden px-6 pb-6">
+                <div class="text-[#49739c] space-y-4">
+                    <div>
+                        <div class="font-medium text-[#0d141c] mb-2">主要打擊統計：</div>
+                        <ul class="list-disc list-inside space-y-1 ml-4 text-sm">
+                            <li><strong>AVG（打擊率）：</strong>安打數 ÷ 打數</li>
+                            <li><strong>HR（全壘打）：</strong>單季或生涯全壘打總數</li>
+                            <li><strong>RBI（打點）：</strong>幫助隊友得分的次數</li>
+                            <li><strong>OPS：</strong>上壘率 + 長打率，綜合打擊能力指標</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="font-medium text-[#0d141c] mb-2">主要投球統計：</div>
+                        <ul class="list-disc list-inside space-y-1 ml-4 text-sm">
+                            <li><strong>ERA（防禦率）：</strong>每九局失分，越低越好</li>
+                            <li><strong>WHIP：</strong>每局被安打和保送數，越低越好</li>
+                            <li><strong>SO（三振）：</strong>投出三振的次數</li>
+                            <li><strong>W-L（勝負）：</strong>勝場數和敗場數</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FAQ Item 4 -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] shadow-sm">
+            <button class="faq-button w-full p-6 text-left focus:outline-none" onclick="toggleFaq(this)">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-[#0d141c] text-lg font-bold">系統支援哪些瀏覽器？</h3>
+                    <svg class="faq-icon w-5 h-5 text-[#49739c] transform transition-transform" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
+                    </svg>
+                </div>
+            </button>
+            <div class="faq-content hidden px-6 pb-6">
+                <div class="text-[#49739c] space-y-2">
+                    <p>我們支援所有現代瀏覽器，建議使用最新版本以獲得最佳體驗：</p>
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <div class="font-medium text-[#0d141c] mb-2">桌面瀏覽器：</div>
+                            <ul class="list-disc list-inside space-y-1 ml-4 text-sm">
+                                <li>Chrome 90+</li>
+                                <li>Firefox 88+</li>
+                                <li>Safari 14+</li>
+                                <li>Edge 90+</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <div class="font-medium text-[#0d141c] mb-2">行動裝置：</div>
+                            <ul class="list-disc list-inside space-y-1 ml-4 text-sm">
+                                <li>iOS Safari 14+</li>
+                                <li>Android Chrome 90+</li>
+                                <li>Samsung Internet 14+</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FAQ Item 5 -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] shadow-sm">
+            <button class="faq-button w-full p-6 text-left focus:outline-none" onclick="toggleFaq(this)">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-[#0d141c] text-lg font-bold">如何回報問題或建議功能？</h3>
+                    <svg class="faq-icon w-5 h-5 text-[#49739c] transform transition-transform" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
+                    </svg>
+                </div>
+            </button>
+            <div class="faq-content hidden px-6 pb-6">
+                <div class="text-[#49739c] space-y-2">
+                    <p>我們非常重視使用者的意見回饋，您可以透過以下方式聯繫我們：</p>
+                    <ul class="list-disc list-inside space-y-1 ml-4">
+                        <li><strong>電子郵件：</strong>support@mlbstats.com</li>
+                        <li><strong>技術問題：</strong>請詳細描述問題發生的步驟</li>
+                        <li><strong>功能建議：</strong>歡迎提出任何改進建議</li>
+                        <li><strong>緊急問題：</strong>系統異常請立即聯繫我們</li>
+                    </ul>
+                    <p>我們通常會在 24 小時內回覆您的訊息。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Keyboard Shortcuts -->
+<div class="p-4 mb-8">
+    <div class="bg-white rounded-xl border border-[#e7edf4] p-8 shadow-sm">
+        <h2 class="text-[#0d141c] text-[24px] font-bold leading-tight mb-6 text-center">鍵盤快速鍵</h2>
+        
+        <div class="grid gap-6 md:grid-cols-2">
+            <div>
+                <h3 class="text-[#0d141c] text-lg font-bold mb-4">一般快速鍵</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[#49739c]">專注搜尋框</span>
+                        <span class="px-2 py-1 bg-gray-100 rounded text-sm font-mono">Ctrl + K</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[#49739c]">返回首頁</span>
+                        <span class="px-2 py-1 bg-gray-100 rounded text-sm font-mono">Alt + H</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[#49739c]">開啟說明</span>
+                        <span class="px-2 py-1 bg-gray-100 rounded text-sm font-mono">?</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="text-[#0d141c] text-lg font-bold mb-4">比賽頁面快速鍵</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[#49739c]">前一天</span>
+                        <span class="px-2 py-1 bg-gray-100 rounded text-sm font-mono">←</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[#49739c]">後一天</span>
+                        <span class="px-2 py-1 bg-gray-100 rounded text-sm font-mono">→</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[#49739c]">回到今天</span>
+                        <span class="px-2 py-1 bg-gray-100 rounded text-sm font-mono">T</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer Navigation -->
+<div class="p-4">
+    <div class="bg-gray-50 rounded-xl p-6 text-center">
+        <p class="text-[#49739c] mb-4">還有其他問題嗎？</p>
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="{% url 'mlb_app:about' %}" class="text-blue-600 hover:text-blue-800 transition-colors">關於我們</a>
+            <span class="text-[#49739c]">•</span>
+            <a href="mailto:support@mlbstats.com" class="text-blue-600 hover:text-blue-800 transition-colors">聯繫支援</a>
+            <span class="text-[#49739c]">•</span>
+            <a href="{% url 'mlb_app:index' %}" class="text-blue-600 hover:text-blue-800 transition-colors">返回首頁</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleFaq(button) {
+    const content = button.nextElementSibling;
+    const icon = button.querySelector('.faq-icon');
+    
+    if (content.classList.contains('hidden')) {
+        // Close all other FAQs
+        document.querySelectorAll('.faq-content').forEach(item => {
+            item.classList.add('hidden');
+        });
+        document.querySelectorAll('.faq-icon').forEach(item => {
+            item.classList.remove('rotate-90');
+        });
+        
+        // Open this FAQ
+        content.classList.remove('hidden');
+        icon.classList.add('rotate-90');
+    } else {
+        // Close this FAQ
+        content.classList.add('hidden');
+        icon.classList.remove('rotate-90');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Help shortcut
+        if (e.key === '?' && !isInputFocused()) {
+            // Already on help page, scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Ctrl/Cmd + K for search
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            const searchInput = document.querySelector('input[name="q"]');
+            if (searchInput) {
+                searchInput.focus();
+            } else {
+                window.location.href = '{% url "mlb_app:search_players" %}';
+            }
+        }
+        
+        // Alt + H for home
+        if (e.altKey && e.key === 'h') {
+            e.preventDefault();
+            window.location.href = '{% url "mlb_app:index" %}';
+        }
+    });
+    
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+    
+    // Auto-open FAQ if URL has hash
+    if (window.location.hash) {
+        const targetFaq = document.querySelector(window.location.hash);
+        if (targetFaq) {
+            const button = targetFaq.querySelector('.faq-button');
+            if (button) {
+                toggleFaq(button);
+                targetFaq.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    }
+});
+
+function isInputFocused() {
+    const activeElement = document.activeElement;
+    return activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.tagName === 'SELECT');
+}
+</script>
+{% endblock %}

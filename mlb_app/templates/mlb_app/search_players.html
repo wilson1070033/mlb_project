@@ -1,0 +1,387 @@
+{% extends 'mlb_app/base.html' %}
+{% load static %}
+
+{% block title %}
+{% if query %}
+"{{ query }}" 球員搜尋結果 - MLB 統計查詢系統
+{% else %}
+球員搜尋 - MLB 統計查詢系統
+{% endif %}
+{% endblock %}
+
+{% block description %}
+{% if query %}
+搜尋 "{{ query }}" 的 MLB 球員結果，查看球員詳細資料、統計數據和表現分析。
+{% else %}
+搜尋任何 MLB 球員，查看詳細資料、統計數據和表現分析。瀏覽熱門球員和最新統計。
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="flex flex-wrap justify-between gap-3 p-4 mb-6">
+    <div class="flex flex-col gap-2">
+        <h1 class="text-[#0d141c] tracking-light text-[32px] font-bold leading-tight">
+            {% if query %}球員搜尋結果{% else %}球員搜尋{% endif %}
+        </h1>
+        {% if query %}
+            <p class="text-[#49739c] text-lg leading-relaxed">
+                搜尋 "{{ query }}" 的結果
+                {% if total_results %}
+                    <span class="font-medium">（找到 {{ total_results }} 位球員）</span>
+                {% endif %}
+            </p>
+        {% else %}
+            <p class="text-[#49739c] text-lg leading-relaxed">
+                搜尋任何 MLB 球員，查看詳細資料和統計數據
+            </p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Enhanced Search Section -->
+<div class="px-4 py-3 mb-6">
+    <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm">
+        <form method="get" action="{% url 'mlb_app:search_players' %}" class="space-y-4">
+            <div class="flex flex-col gap-2">
+                <label class="text-[#0d141c] text-sm font-medium">搜尋球員</label>
+                <div class="flex w-full flex-1 items-stretch rounded-xl h-12">
+                    <div class="text-[#49739c] flex border-none bg-[#e7edf4] items-center justify-center pl-4 rounded-l-xl border-r-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor" viewBox="0 0 256 256">
+                            <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
+                        </svg>
+                    </div>
+                    <input
+                        name="q"
+                        placeholder="輸入球員姓名 (例如: Shohei Ohtani, Aaron Judge)"
+                        value="{{ query|default:'' }}"
+                        class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-[#0d141c] focus:outline-0 focus:ring-0 border-none bg-[#e7edf4] focus:border-none h-full placeholder:text-[#49739c] px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal"
+                        autocomplete="off"
+                        id="player-search-input"
+                    />
+                    <button type="submit" class="px-6 bg-blue-600 text-white rounded-r-xl hover:bg-blue-700 transition-colors font-medium">
+                        搜尋
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Search Tips -->
+            <div class="text-sm text-[#49739c]">
+                <p>💡 搜尋提示：可以輸入球員的英文姓名，支援部分匹配。例如："Ohtani"、"Judge"、"Betts"</p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Search Results or Popular Players -->
+{% if query %}
+    <!-- Search Results -->
+    {% if players %}
+        <div class="p-4">
+            <div class="mb-6">
+                <h2 class="text-[#0d141c] text-[22px] font-bold leading-tight tracking-[-0.015em] mb-2">
+                    搜尋結果
+                </h2>
+                <p class="text-[#49739c]">找到 {{ total_results }} 位符合條件的球員</p>
+            </div>
+            
+            <!-- Results Grid -->
+            <div class="grid gap-4">
+                {% for player in players %}
+                    <div class="bg-white rounded-xl border border-[#e7edf4] shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex items-center gap-6">
+                                <!-- Player Avatar -->
+                                <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256" class="text-blue-600">
+                                        <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM74.08,197.5a64,64,0,0,1,107.84,0,87.83,87.83,0,0,1-107.84,0ZM96,120a32,32,0,1,1,32,32A32,32,0,0,1,96,120Zm97.76,66.41a79.66,79.66,0,0,0-36.06-28.75,48,48,0,1,0-59.4,0,79.66,79.66,0,0,0-36.06,28.75,88,88,0,1,1,131.52,0Z"></path>
+                                    </svg>
+                                </div>
+                                
+                                <!-- Player Info -->
+                                <div class="flex-1">
+                                    <h3 class="text-[#0d141c] text-lg font-bold leading-tight mb-2">
+                                        {{ player.fullName }}
+                                    </h3>
+                                    
+                                    <div class="flex flex-wrap items-center gap-4 text-sm text-[#49739c] mb-3">
+                                        <span class="flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                                                <path d="M117.25,157.92a60,60,0,1,0-66.5,0A95.83,95.83,0,0,0,3.53,195.63a8,8,0,1,0,13.4,8.74,80,80,0,0,1,134.14,0,8,8,0,0,0,13.4-8.74A95.83,95.83,0,0,0,117.25,157.92ZM40,108a44,44,0,1,1,44,44A44.05,44.05,0,0,1,40,108Zm210.07,87.63a8,8,0,0,1-5.07,10.1,8.07,8.07,0,0,1-2.53.4,8,8,0,0,1-7.57-5.47,80,80,0,0,0-134.14,0,8,8,0,0,1-13.4-8.74,95.83,95.83,0,0,1,47.22-37.71,60,60,0,1,1,66.5,0A95.83,95.83,0,0,1,250.07,195.63ZM172,108a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,108Z"></path>
+                                            </svg>
+                                            {{ player.currentTeam }}
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                                                <path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM112,168a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Zm48,0a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Z"></path>
+                                            </svg>
+                                            {{ player.primaryPosition }}
+                                        </span>
+                                        {% if player.batSide and player.batSide != 'N/A' %}
+                                            <span class="flex items-center gap-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+                                                    <path d="M232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128ZM94.34,98.34,116.69,120,94.34,141.66a8,8,0,0,0,11.32,11.32L128,130.65l22.34,22.33a8,8,0,0,0,11.32-11.32L139.31,120l22.35-21.66a8,8,0,0,0-11.32-11.32L128,109.35,105.66,87a8,8,0,0,0-11.32,11.32Z"></path>
+                                                </svg>
+                                                {{ player.batSide }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Physical Stats -->
+                                    {% if player.height or player.weight %}
+                                        <div class="flex items-center gap-4 text-sm text-[#49739c] mb-3">
+                                            {% if player.height %}
+                                                <span>身高: {{ player.height }}</span>
+                                            {% endif %}
+                                            {% if player.weight %}
+                                                <span>體重: {{ player.weight }}</span>
+                                            {% endif %}
+                                            {% if player.birthDate %}
+                                                <span>生日: {{ player.birthDate }}</span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="flex flex-col gap-2">
+                                    <a href="{% url 'mlb_app:player_detail' player.id %}" 
+                                       class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm text-center">
+                                        查看詳情
+                                    </a>
+                                    <a href="{% url 'mlb_app:player_stats' player.id %}" 
+                                       class="px-4 py-2 border border-[#e7edf4] text-[#0d141c] rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm text-center">
+                                        統計數據
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <div class="mt-8 flex justify-center">
+                    <nav class="flex items-center gap-2">
+                        {% if players.has_previous %}
+                            <a href="?q={{ query }}&page={{ players.previous_page_number }}" 
+                               class="px-3 py-2 text-sm text-[#49739c] hover:text-blue-600 transition-colors">
+                                上一頁
+                            </a>
+                        {% endif %}
+                        
+                        <span class="px-4 py-2 text-sm text-[#0d141c] font-medium">
+                            第 {{ players.number }} 頁，共 {{ paginator.num_pages }} 頁
+                        </span>
+                        
+                        {% if players.has_next %}
+                            <a href="?q={{ query }}&page={{ players.next_page_number }}" 
+                               class="px-3 py-2 text-sm text-[#49739c] hover:text-blue-600 transition-colors">
+                                下一頁
+                            </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <!-- No Results Found -->
+        <div class="p-4">
+            <div class="bg-white rounded-xl border border-[#e7edf4] p-12 text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 256 256" class="text-[#49739c] mx-auto mb-6">
+                    <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
+                </svg>
+                <h3 class="text-[#0d141c] text-xl font-bold mb-4">找不到相關球員</h3>
+                <p class="text-[#49739c] mb-6">沒有找到與 "{{ query }}" 相關的球員，請嘗試以下建議：</p>
+                <div class="text-left max-w-md mx-auto mb-6">
+                    <ul class="text-[#49739c] text-sm space-y-2">
+                        <li>• 檢查拼寫是否正確</li>
+                        <li>• 嘗試使用球員的英文姓名</li>
+                        <li>• 使用較短的關鍵字（例如只輸入姓氏）</li>
+                        <li>• 確認球員目前是現役球員</li>
+                    </ul>
+                </div>
+                <button onclick="clearSearch()" 
+                        class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    清除搜尋，查看熱門球員
+                </button>
+            </div>
+        </div>
+    {% endif %}
+{% else %}
+    <!-- Popular Players Section (when no search) -->
+    {% if popular_players %}
+        <div class="p-4">
+            <div class="mb-6">
+                <h2 class="text-[#0d141c] text-[22px] font-bold leading-tight tracking-[-0.015em] mb-2">
+                    熱門球員
+                </h2>
+                <p class="text-[#49739c]">探索這些受歡迎的 MLB 球員</p>
+            </div>
+            
+            <!-- Popular Players Grid -->
+            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {% for player in popular_players %}
+                    <div class="bg-white rounded-xl border border-[#e7edf4] shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                        <div class="p-6">
+                            <div class="text-center">
+                                <!-- Player Avatar -->
+                                <div class="w-20 h-20 bg-gradient-to-br from-blue-100 to-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 256 256" class="text-blue-600">
+                                        <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM74.08,197.5a64,64,0,0,1,107.84,0,87.83,87.83,0,0,1-107.84,0ZM96,120a32,32,0,1,1,32,32A32,32,0,0,1,96,120Zm97.76,66.41a79.66,79.66,0,0,0-36.06-28.75,48,48,0,1,0-59.4,0,79.66,79.66,0,0,0-36.06,28.75,88,88,0,1,1,131.52,0Z"></path>
+                                    </svg>
+                                </div>
+                                
+                                <h3 class="text-[#0d141c] text-lg font-bold mb-2">{{ player.fullName }}</h3>
+                                
+                                <div class="text-sm text-[#49739c] mb-4 space-y-1">
+                                    <div>{{ player.currentTeam }}</div>
+                                    <div>{{ player.primaryPosition }}</div>
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="flex gap-2">
+                                    <a href="{% url 'mlb_app:player_detail' player.id %}" 
+                                       class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm text-center">
+                                        詳情
+                                    </a>
+                                    <a href="{% url 'mlb_app:player_stats' player.id %}" 
+                                       class="flex-1 px-3 py-2 border border-[#e7edf4] text-[#0d141c] rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm text-center">
+                                        統計
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <!-- No Popular Players Available -->
+        <div class="p-4">
+            <div class="bg-white rounded-xl border border-[#e7edf4] p-12 text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 256 256" class="text-[#49739c] mx-auto mb-6">
+                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM74.08,197.5a64,64,0,0,1,107.84,0,87.83,87.83,0,0,1-107.84,0ZM96,120a32,32,0,1,1,32,32A32,32,0,0,1,96,120Zm97.76,66.41a79.66,79.66,0,0,0-36.06-28.75,48,48,0,1,0-59.4,0,79.66,79.66,0,0,0-36.06,28.75,88,88,0,1,1,131.52,0Z"></path>
+                </svg>
+                <h3 class="text-[#0d141c] text-xl font-bold mb-4">暫無球員資料</h3>
+                <p class="text-[#49739c] mb-6">目前無法載入球員資訊，請使用上方的搜尋功能查找特定球員。</p>
+                <div class="flex justify-center">
+                    <button onclick="focusSearchInput()" 
+                            class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                        開始搜尋球員
+                    </button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endif %}
+
+<!-- Search Suggestions -->
+<div class="p-4 mt-8">
+    <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm">
+        <h3 class="text-[#0d141c] text-lg font-bold mb-4">搜尋建議</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {% for suggestion in "Shohei Ohtani,Aaron Judge,Mookie Betts,Fernando Tatis Jr.,Mike Trout,Ronald Acuna Jr.,Manny Machado,Juan Soto"|split:"," %}
+                <button onclick="searchPlayer('{{ suggestion }}')" 
+                        class="p-3 text-sm text-[#49739c] hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-left border border-transparent hover:border-blue-200">
+                    {{ suggestion }}
+                </button>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function clearSearch() {
+    window.location.href = "{% url 'mlb_app:search_players' %}";
+}
+
+function focusSearchInput() {
+    const input = document.getElementById('player-search-input');
+    if (input) {
+        input.focus();
+    }
+}
+
+function searchPlayer(playerName) {
+    const form = document.querySelector('form[action="{% url 'mlb_app:search_players' %}"]');
+    const input = form.querySelector('input[name="q"]');
+    input.value = playerName;
+    form.submit();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('player-search-input');
+    
+    // Auto-focus search input if no query
+    {% if not query %}
+        if (searchInput) {
+            searchInput.focus();
+        }
+    {% endif %}
+    
+    // Add search suggestions functionality
+    let suggestionsDiv = null;
+    
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        if (query.length >= 2) {
+            // Here you could implement real-time search suggestions
+            // For now, we'll show some static suggestions
+            showSuggestions(query);
+        } else {
+            hideSuggestions();
+        }
+    });
+    
+    searchInput.addEventListener('blur', function() {
+        // Hide suggestions after a short delay to allow clicking
+        setTimeout(hideSuggestions, 200);
+    });
+    
+    function showSuggestions(query) {
+        // This is a simplified version - in production you'd make an AJAX call
+        const suggestions = [
+            'Shohei Ohtani', 'Aaron Judge', 'Mookie Betts', 'Fernando Tatis Jr.',
+            'Mike Trout', 'Ronald Acuna Jr.', 'Manny Machado', 'Juan Soto'
+        ].filter(name => name.toLowerCase().includes(query.toLowerCase()));
+        
+        if (suggestions.length > 0) {
+            if (!suggestionsDiv) {
+                suggestionsDiv = document.createElement('div');
+                suggestionsDiv.className = 'absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1';
+                searchInput.parentNode.parentNode.style.position = 'relative';
+                searchInput.parentNode.parentNode.appendChild(suggestionsDiv);
+            }
+            
+            suggestionsDiv.innerHTML = suggestions.slice(0, 5).map(name => 
+                `<div class="px-4 py-2 hover:bg-gray-100 cursor-pointer" onclick="searchPlayer('${name}')">${name}</div>`
+            ).join('');
+            
+            suggestionsDiv.style.display = 'block';
+        } else {
+            hideSuggestions();
+        }
+    }
+    
+    function hideSuggestions() {
+        if (suggestionsDiv) {
+            suggestionsDiv.style.display = 'none';
+        }
+    }
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + K to focus search
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            focusSearchInput();
+        }
+    });
+});
+</script>
+{% endblock %}

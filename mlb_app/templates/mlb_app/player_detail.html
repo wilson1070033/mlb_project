@@ -1,0 +1,394 @@
+{% extends 'mlb_app/base.html' %}
+{% load static %}
+
+{% block title %}{{ player_basic_info.name }} - 球員詳細資訊 - MLB 統計查詢系統{% endblock %}
+
+{% block description %}查看 {{ player_basic_info.name }} 的詳細資料、統計數據、職業生涯表現和最新消息。{% endblock %}
+
+{% block content %}
+<!-- Player Header -->
+<div class="p-4 mb-6">
+    <div class="bg-gradient-to-r from-blue-600 to-green-600 rounded-xl text-white p-8">
+        <div class="flex items-center gap-8">
+            <!-- Player Avatar -->
+            <div class="w-24 h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 256 256" class="text-white">
+                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM74.08,197.5a64,64,0,0,1,107.84,0,87.83,87.83,0,0,1-107.84,0ZM96,120a32,32,0,1,1,32,32A32,32,0,0,1,96,120Zm97.76,66.41a79.66,79.66,0,0,0-36.06-28.75,48,48,0,1,0-59.4,0,79.66,79.66,0,0,0-36.06,28.75,88,88,0,1,1,131.52,0Z"></path>
+                </svg>
+            </div>
+            
+            <!-- Player Info -->
+            <div class="flex-1">
+                <h1 class="text-3xl font-bold mb-2">{{ player_basic_info.name }}</h1>
+                <div class="flex flex-wrap items-center gap-4 text-lg opacity-90">
+                    <span class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                            <path d="M117.25,157.92a60,60,0,1,0-66.5,0A95.83,95.83,0,0,0,3.53,195.63a8,8,0,1,0,13.4,8.74,80,80,0,0,1,134.14,0,8,8,0,0,0,13.4-8.74A95.83,95.83,0,0,0,117.25,157.92ZM40,108a44,44,0,1,1,44,44A44.05,44.05,0,0,1,40,108Zm210.07,87.63a8,8,0,0,1-5.07,10.1,8.07,8.07,0,0,1-2.53.4,8,8,0,0,1-7.57-5.47,80,80,0,0,0-134.14,0,8,8,0,0,1-13.4-8.74,95.83,95.83,0,0,1,47.22-37.71,60,60,0,1,1,66.5,0A95.83,95.83,0,0,1,250.07,195.63ZM172,108a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,108Z"></path>
+                        </svg>
+                        球員 ID: {{ player_id }}
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="flex flex-col gap-3">
+                <a href="{% url 'mlb_app:player_stats' player_id %}" 
+                   class="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors font-medium text-center">
+                    查看統計數據
+                </a>
+                <button onclick="sharePlayer()" 
+                        class="px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-colors font-medium">
+                    分享球員
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation Tabs -->
+<div class="p-4 mb-6">
+    <div class="bg-white rounded-xl border border-[#e7edf4] shadow-sm">
+        <div class="flex border-b border-[#e7edf4] overflow-x-auto">
+            <button class="tab-button active px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 border-blue-600 text-blue-600" data-tab="overview">
+                總覽
+            </button>
+            <button class="tab-button px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 border-transparent text-[#49739c] hover:text-blue-600" data-tab="hitting">
+                打擊統計
+            </button>
+            <button class="tab-button px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 border-transparent text-[#49739c] hover:text-blue-600" data-tab="pitching">
+                投球統計
+            </button>
+            <button class="tab-button px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 border-transparent text-[#49739c] hover:text-blue-600" data-tab="fielding">
+                守備統計
+            </button>
+        </div>
+        
+        <!-- Tab Content -->
+        <div class="p-6">
+            <!-- Overview Tab -->
+            <div id="overview-tab" class="tab-content">
+                <div class="grid gap-6 md:grid-cols-2">
+                    <!-- Basic Information Card -->
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-bold text-[#0d141c] mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                                <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM74.08,197.5a64,64,0,0,1,107.84,0,87.83,87.83,0,0,1-107.84,0ZM96,120a32,32,0,1,1,32,32A32,32,0,0,1,96,120Zm97.76,66.41a79.66,79.66,0,0,0-36.06-28.75,48,48,0,1,0-59.4,0,79.66,79.66,0,0,0-36.06,28.75,88,88,0,1,1,131.52,0Z"></path>
+                            </svg>
+                            基本資料
+                        </h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-[#49739c]">MLB ID:</span>
+                                <span class="font-medium text-[#0d141c]">{{ player_id }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-[#49739c]">狀態:</span>
+                                <span class="font-medium text-green-600">現役球員</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-[#49739c]">最後更新:</span>
+                                <span class="font-medium text-[#0d141c]">{{ 'today'|date:'Y-m-d' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats Card -->
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-bold text-[#0d141c] mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                                <path d="M232,208a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V48a8,8,0,0,1,16,0V156.69L82.34,114.34a8,8,0,0,1,11.32,0L128,148.69l42.34-42.35a8,8,0,0,1,11.32,0L216,140.69V48a8,8,0,0,1,16,0V208Z"></path>
+                            </svg>
+                            快速統計
+                        </h3>
+                        <div class="text-center">
+                            <p class="text-[#49739c] text-sm mb-2">本賽季統計數據載入中...</p>
+                            <div class="animate-pulse bg-gray-200 h-20 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Performance -->
+                <div class="mt-6">
+                    <h3 class="text-lg font-bold text-[#0d141c] mb-4">近期表現</h3>
+                    <div class="bg-gray-50 rounded-lg p-6 text-center">
+                        <p class="text-[#49739c]">載入最新比賽表現數據中...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hitting Stats Tab -->
+            <div id="hitting-tab" class="tab-content hidden">
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-[#0d141c] mb-4">打擊統計</h3>
+                    
+                    {% if hitting_stats %}
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-[#e7edf4]">
+                                        <th class="text-left py-3 px-4 text-[#0d141c] font-medium">賽季</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">G</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">AB</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">R</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">H</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">HR</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">RBI</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">AVG</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">OPS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for stat in hitting_stats %}
+                                        <tr class="border-b border-[#e7edf4] hover:bg-gray-50">
+                                            <td class="py-3 px-4 text-[#0d141c] font-medium">
+                                                {{ stat.season|default:"目前" }}
+                                            </td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.gamesPlayed|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.atBats|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.runs|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.hits|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.homeRuns|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.rbi|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ stat.stat.avg|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ stat.stat.ops|default:"-" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="bg-gray-50 rounded-lg p-8 text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 256 256" class="text-[#49739c] mx-auto mb-4">
+                                <path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,184a8,8,0,0,1-16,0V168a8,8,0,0,1,16,0Zm0-40a8,8,0,0,1-16,0V112a8,8,0,0,1,16,0Zm48,40a8,8,0,0,1-16,0V136a8,8,0,0,1,16,0Zm0-64a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Zm48,64a8,8,0,0,1-16,0V152a8,8,0,0,1,16,0Zm0-48a8,8,0,0,1-16,0V72a8,8,0,0,1,16,0Zm48,48a8,8,0,0,1-16,0V120a8,8,0,0,1,16,0Z"></path>
+                            </svg>
+                            <h4 class="text-[#0d141c] text-lg font-medium mb-2">無打擊統計數據</h4>
+                            <p class="text-[#49739c]">該球員可能是投手或目前沒有打擊統計數據。</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Pitching Stats Tab -->
+            <div id="pitching-tab" class="tab-content hidden">
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-[#0d141c] mb-4">投球統計</h3>
+                    
+                    {% if pitching_stats %}
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-[#e7edf4]">
+                                        <th class="text-left py-3 px-4 text-[#0d141c] font-medium">賽季</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">G</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">GS</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">W</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">L</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">ERA</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">IP</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">SO</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">WHIP</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for stat in pitching_stats %}
+                                        <tr class="border-b border-[#e7edf4] hover:bg-gray-50">
+                                            <td class="py-3 px-4 text-[#0d141c] font-medium">
+                                                {{ stat.season|default:"目前" }}
+                                            </td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.gamesPitched|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.gamesStarted|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.wins|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.losses|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ stat.stat.era|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.inningsPitched|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.strikeOuts|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ stat.stat.whip|default:"-" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="bg-gray-50 rounded-lg p-8 text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 256 256" class="text-[#49739c] mx-auto mb-4">
+                                <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM72,128a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,128Z"></path>
+                            </svg>
+                            <h4 class="text-[#0d141c] text-lg font-medium mb-2">無投球統計數據</h4>
+                            <p class="text-[#49739c]">該球員可能不是投手或目前沒有投球統計數據。</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Fielding Stats Tab -->
+            <div id="fielding-tab" class="tab-content hidden">
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-[#0d141c] mb-4">守備統計</h3>
+                    
+                    {% if fielding_stats %}
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-[#e7edf4]">
+                                        <th class="text-left py-3 px-4 text-[#0d141c] font-medium">賽季</th>
+                                        <th class="text-left py-3 px-4 text-[#0d141c] font-medium">位置</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">G</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">TC</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">A</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">PO</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">E</th>
+                                        <th class="text-right py-3 px-4 text-[#0d141c] font-medium">FPct</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for stat in fielding_stats %}
+                                        <tr class="border-b border-[#e7edf4] hover:bg-gray-50">
+                                            <td class="py-3 px-4 text-[#0d141c] font-medium">
+                                                {{ stat.season|default:"目前" }}
+                                            </td>
+                                            <td class="py-3 px-4 text-[#0d141c]">{{ stat.position.abbreviation|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.gamesPlayed|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.chances|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.assists|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.putOuts|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ stat.stat.errors|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ stat.stat.fielding|default:"-" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="bg-gray-50 rounded-lg p-8 text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 256 256" class="text-[#49739c] mx-auto mb-4">
+                                <path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM112,168a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Zm48,0a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Z"></path>
+                            </svg>
+                            <h4 class="text-[#0d141c] text-lg font-medium mb-2">無守備統計數據</h4>
+                            <p class="text-[#49739c]">目前沒有該球員的守備統計數據。</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="p-4">
+    <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm">
+        <h3 class="text-[#0d141c] text-lg font-bold mb-4">更多功能</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="{% url 'mlb_app:player_stats' player_id %}" 
+               class="p-4 text-center border border-[#e7edf4] rounded-lg hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-blue-600 mx-auto mb-2">
+                    <path d="M232,208a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V48a8,8,0,0,1,16,0V156.69L82.34,114.34a8,8,0,0,1,11.32,0L128,148.69l42.34-42.35a8,8,0,0,1,11.32,0L216,140.69V48a8,8,0,0,1,16,0V208Z"></path>
+                </svg>
+                <div class="text-sm font-medium text-[#0d141c]">詳細統計</div>
+            </a>
+            
+            <a href="{% url 'mlb_app:search_players' %}" 
+               class="p-4 text-center border border-[#e7edf4] rounded-lg hover:bg-green-50 hover:border-green-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-green-600 mx-auto mb-2">
+                    <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
+                </svg>
+                <div class="text-sm font-medium text-[#0d141c]">搜尋其他球員</div>
+            </a>
+            
+            <a href="{% url 'mlb_app:games' %}" 
+               class="p-4 text-center border border-[#e7edf4] rounded-lg hover:bg-purple-50 hover:border-purple-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-purple-600 mx-auto mb-2">
+                    <path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,184a8,8,0,0,1-16,0V168a8,8,0,0,1,16,0Zm0-40a8,8,0,0,1-16,0V112a8,8,0,0,1,16,0Zm48,40a8,8,0,0,1-16,0V136a8,8,0,0,1,16,0Zm0-64a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Zm48,64a8,8,0,0,1-16,0V152a8,8,0,0,1,16,0Zm0-48a8,8,0,0,1-16,0V72a8,8,0,0,1,16,0Zm48,48a8,8,0,0,1-16,0V120a8,8,0,0,1,16,0Z"></path>
+                </svg>
+                <div class="text-sm font-medium text-[#0d141c]">查看比賽</div>
+            </a>
+            
+            <a href="{% url 'mlb_app:index' %}" 
+               class="p-4 text-center border border-[#e7edf4] rounded-lg hover:bg-orange-50 hover:border-orange-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-orange-600 mx-auto mb-2">
+                    <path d="M224,115.55V208a16,16,0,0,1-16,16H168a16,16,0,0,1-16-16V168a8,8,0,0,0-8-8H112a8,8,0,0,0-8,8v40a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V115.55a16,16,0,0,1,5.17-11.78l80-75.48.11-.11a16,16,0,0,1,21.44,0,1.14,1.14,0,0,0,.11.11l80,75.48A16,16,0,0,1,224,115.55Z"></path>
+                </svg>
+                <div class="text-sm font-medium text-[#0d141c]">返回首頁</div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab functionality
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetTab = this.getAttribute('data-tab');
+            
+            // Remove active class from all buttons and contents
+            tabButtons.forEach(btn => {
+                btn.classList.remove('active', 'border-blue-600', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-[#49739c]');
+            });
+            tabContents.forEach(content => content.classList.add('hidden'));
+            
+            // Add active class to clicked button and show corresponding content
+            this.classList.add('active', 'border-blue-600', 'text-blue-600');
+            this.classList.remove('border-transparent', 'text-[#49739c]');
+            document.getElementById(targetTab + '-tab').classList.remove('hidden');
+        });
+    });
+});
+
+function sharePlayer() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ player_basic_info.name }} - MLB 球員資訊',
+            text: '查看 {{ player_basic_info.name }} 的詳細統計數據和表現',
+            url: window.location.href
+        }).catch(console.error);
+    } else {
+        // Fallback for browsers that don't support Web Share API
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            // Show success message
+            const message = document.createElement('div');
+            message.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+            message.textContent = '連結已複製到剪貼簿';
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                if (message.parentNode) {
+                    message.parentNode.removeChild(message);
+                }
+            }, 3000);
+        }).catch(() => {
+            alert('無法複製連結，請手動複製網址');
+        });
+    }
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Numbers 1-4 to switch tabs
+    if (e.key >= '1' && e.key <= '4' && !isInputFocused()) {
+        const tabIndex = parseInt(e.key) - 1;
+        const tabButtons = document.querySelectorAll('.tab-button');
+        if (tabButtons[tabIndex]) {
+            tabButtons[tabIndex].click();
+        }
+    }
+    
+    // S for share
+    if (e.key === 's' || e.key === 'S') {
+        if (!isInputFocused()) {
+            sharePlayer();
+        }
+    }
+});
+
+function isInputFocused() {
+    const activeElement = document.activeElement;
+    return activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA');
+}
+</script>
+{% endblock %}

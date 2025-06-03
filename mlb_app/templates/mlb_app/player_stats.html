@@ -1,0 +1,443 @@
+{% extends 'mlb_app/base.html' %}
+{% load static %}
+
+{% block title %}球員 {{ player_id }} 統計數據 - MLB 統計查詢系統{% endblock %}
+
+{% block description %}查看球員 {{ player_id }} 的詳細統計數據，包含打擊、投球、守備等各項表現分析。{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="p-4 mb-6">
+    <div class="flex flex-wrap justify-between items-center gap-4">
+        <div>
+            <h1 class="text-[#0d141c] tracking-light text-[32px] font-bold leading-tight">
+                球員統計數據
+            </h1>
+            <p class="text-[#49739c] text-lg leading-relaxed">
+                球員 ID: {{ player_id }} 的詳細統計分析
+            </p>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="flex gap-3">
+            <a href="{% url 'mlb_app:player_detail' player_id %}" 
+               class="px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200">
+                ← 返回球員資訊
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Query Form -->
+<div class="p-4 mb-6">
+    <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm">
+        <h2 class="text-[#0d141c] text-xl font-bold mb-4">統計數據查詢</h2>
+        
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Stat Group Selection -->
+                <div class="space-y-2">
+                    <label class="text-[#0d141c] text-sm font-medium">統計類別</label>
+                    <select name="stat_group" class="w-full px-3 py-2 border border-[#e7edf4] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="hitting" {% if stat_group == 'hitting' %}selected{% endif %}>打擊統計</option>
+                        <option value="pitching" {% if stat_group == 'pitching' %}selected{% endif %}>投球統計</option>
+                        <option value="fielding" {% if stat_group == 'fielding' %}selected{% endif %}>守備統計</option>
+                    </select>
+                </div>
+                
+                <!-- Stat Type Selection -->
+                <div class="space-y-2">
+                    <label class="text-[#0d141c] text-sm font-medium">時間範圍</label>
+                    <select name="stat_type" class="w-full px-3 py-2 border border-[#e7edf4] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" onchange="toggleSeasonInput(this.value)">
+                        <option value="season" {% if stat_type == 'season' %}selected{% endif %}>單季統計</option>
+                        <option value="career" {% if stat_type == 'career' %}selected{% endif %}>生涯統計</option>
+                        <option value="yearbyyear" {% if stat_type == 'yearbyyear' %}selected{% endif %}>逐年統計</option>
+                    </select>
+                </div>
+                
+                <!-- Season Selection -->
+                <div class="space-y-2" id="season-input" {% if stat_type != 'season' %}style="display: none;"{% endif %}>
+                    <label class="text-[#0d141c] text-sm font-medium">賽季年份</label>
+                    <input name="season" type="number" min="2000" max="{{ 'now'|date:'Y' }}" value="{{ season|default:'now'|date:'Y' }}" 
+                           class="w-full px-3 py-2 border border-[#e7edf4] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    查詢統計數據
+                </button>
+                <button type="button" onclick="resetForm()" class="px-6 py-3 border border-[#e7edf4] text-[#0d141c] rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                    重置
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Statistics Results -->
+{% if stats %}
+    <div class="p-4 mb-6">
+        <div class="bg-white rounded-xl border border-[#e7edf4] shadow-sm overflow-hidden">
+            <!-- Results Header -->
+            <div class="p-6 border-b border-[#e7edf4]">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-[#0d141c] text-xl font-bold">
+                            {% if stat_group == 'hitting' %}打擊統計
+                            {% elif stat_group == 'pitching' %}投球統計
+                            {% elif stat_group == 'fielding' %}守備統計
+                            {% endif %}
+                            
+                            {% if stat_type == 'season' and season %}({{ season }} 賽季)
+                            {% elif stat_type == 'career' %}(生涯)
+                            {% elif stat_type == 'yearbyyear' %}(逐年)
+                            {% endif %}
+                        </h2>
+                        <p class="text-[#49739c] mt-1">找到 {{ total_splits }} 筆統計記錄</p>
+                    </div>
+                    
+                    <!-- Export Options -->
+                    <div class="flex gap-2">
+                        <button onclick="exportTable()" class="px-3 py-1 text-sm text-[#49739c] hover:text-blue-600 transition-colors">
+                            匯出 CSV
+                        </button>
+                        <button onclick="printStats()" class="px-3 py-1 text-sm text-[#49739c] hover:text-blue-600 transition-colors">
+                            列印
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Statistics Table -->
+            <div class="overflow-x-auto">
+                {% if stat_group == 'hitting' %}
+                    <!-- Hitting Statistics Table -->
+                    <table class="w-full text-sm" id="stats-table">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                {% if stat_type == 'yearbyyear' %}<th class="text-left py-3 px-4 text-[#0d141c] font-medium">賽季</th>{% endif %}
+                                {% if stat_type != 'career' %}<th class="text-left py-3 px-4 text-[#0d141c] font-medium">球隊</th>{% endif %}
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">G</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">AB</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">R</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">H</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">2B</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">3B</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">HR</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">RBI</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">BB</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">SO</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">SB</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">AVG</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">OBP</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">SLG</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">OPS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for split in stats %}
+                                <tr class="border-b border-[#e7edf4] hover:bg-gray-50">
+                                    {% if stat_type == 'yearbyyear' %}
+                                        <td class="py-3 px-4 text-[#0d141c] font-medium">{{ split.split_info.season|default:"-" }}</td>
+                                    {% endif %}
+                                    {% if stat_type != 'career' %}
+                                        <td class="py-3 px-4 text-[#0d141c]">{{ split.split_info.team.name|default:"-" }}</td>
+                                    {% endif %}
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.gamesPlayed|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.atBats|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.runs|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.hits|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.doubles|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.triples|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.homeRuns|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.rbi|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.baseOnBalls|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.strikeOuts|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.stolenBases|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ split.formatted_stats.avg|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ split.formatted_stats.obp|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ split.formatted_stats.slg|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#0d141c] font-bold">{{ split.formatted_stats.ops|default:"-" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                {% elif stat_group == 'pitching' %}
+                    <!-- Pitching Statistics Table -->
+                    <table class="w-full text-sm" id="stats-table">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                {% if stat_type == 'yearbyyear' %}<th class="text-left py-3 px-4 text-[#0d141c] font-medium">賽季</th>{% endif %}
+                                {% if stat_type != 'career' %}<th class="text-left py-3 px-4 text-[#0d141c] font-medium">球隊</th>{% endif %}
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">G</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">GS</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">W</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">L</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">SV</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">IP</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">H</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">R</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">ER</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">BB</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">SO</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">ERA</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">WHIP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for split in stats %}
+                                <tr class="border-b border-[#e7edf4] hover:bg-gray-50">
+                                    {% if stat_type == 'yearbyyear' %}
+                                        <td class="py-3 px-4 text-[#0d141c] font-medium">{{ split.split_info.season|default:"-" }}</td>
+                                    {% endif %}
+                                    {% if stat_type != 'career' %}
+                                        <td class="py-3 px-4 text-[#0d141c]">{{ split.split_info.team.name|default:"-" }}</td>
+                                    {% endif %}
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.gamesPitched|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.gamesStarted|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.wins|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.losses|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.saves|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.inningsPitched|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.hits|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.runs|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.earnedRuns|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.baseOnBalls|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.strikeOuts|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#0d141c] font-bold">{{ split.formatted_stats.era|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ split.formatted_stats.whip|default:"-" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                {% elif stat_group == 'fielding' %}
+                    <!-- Fielding Statistics Table -->
+                    <table class="w-full text-sm" id="stats-table">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                {% if stat_type == 'yearbyyear' %}<th class="text-left py-3 px-4 text-[#0d141c] font-medium">賽季</th>{% endif %}
+                                {% if stat_type != 'career' %}<th class="text-left py-3 px-4 text-[#0d141c] font-medium">球隊</th>{% endif %}
+                                <th class="text-left py-3 px-4 text-[#0d141c] font-medium">位置</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">G</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">GS</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">INN</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">TC</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">A</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">PO</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">E</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">DP</th>
+                                <th class="text-right py-3 px-4 text-[#0d141c] font-medium">FPct</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for split in stats %}
+                                <tr class="border-b border-[#e7edf4] hover:bg-gray-50">
+                                    {% if stat_type == 'yearbyyear' %}
+                                        <td class="py-3 px-4 text-[#0d141c] font-medium">{{ split.split_info.season|default:"-" }}</td>
+                                    {% endif %}
+                                    {% if stat_type != 'career' %}
+                                        <td class="py-3 px-4 text-[#0d141c]">{{ split.split_info.team.name|default:"-" }}</td>
+                                    {% endif %}
+                                    <td class="py-3 px-4 text-[#0d141c] font-medium">{{ split.split_info.position.abbreviation|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.gamesPlayed|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.gamesStarted|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.innings|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.chances|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.assists|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.putOuts|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.errors|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#49739c]">{{ split.split_info.stat.doublePlays|default:"-" }}</td>
+                                    <td class="py-3 px-4 text-right text-[#0d141c] font-bold">{{ split.formatted_stats.fielding|default:"-" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chart Section (placeholder for future implementation) -->
+    {% if stat_type == 'yearbyyear' and total_splits > 1 %}
+        <div class="p-4 mb-6">
+            <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm">
+                <h3 class="text-[#0d141c] text-lg font-bold mb-4">統計趨勢圖表</h3>
+                <div class="bg-gray-50 rounded-lg p-8 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 256 256" class="text-[#49739c] mx-auto mb-4">
+                        <path d="M232,208a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V48a8,8,0,0,1,16,0V156.69L82.34,114.34a8,8,0,0,1,11.32,0L128,148.69l42.34-42.35a8,8,0,0,1,11.32,0L216,140.69V48a8,8,0,0,1,16,0V208Z"></path>
+                    </svg>
+                    <h4 class="text-[#0d141c] text-lg font-medium mb-2">圖表功能開發中</h4>
+                    <p class="text-[#49739c]">未來版本將提供互動式統計圖表和趨勢分析。</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+{% else %}
+    <!-- No Statistics Found -->
+    <div class="p-4">
+        <div class="bg-white rounded-xl border border-[#e7edf4] p-12 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 256 256" class="text-[#49739c] mx-auto mb-6">
+                <path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,184a8,8,0,0,1-16,0V168a8,8,0,0,1,16,0Zm0-40a8,8,0,0,1-16,0V112a8,8,0,0,1,16,0Zm48,40a8,8,0,0,1-16,0V136a8,8,0,0,1,16,0Zm0-64a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Zm48,64a8,8,0,0,1-16,0V152a8,8,0,0,1,16,0Zm0-48a8,8,0,0,1-16,0V72a8,8,0,0,1,16,0Zm48,48a8,8,0,0,1-16,0V120a8,8,0,0,1,16,0Z"></path>
+            </svg>
+            <h3 class="text-[#0d141c] text-xl font-bold mb-4">暫無統計數據</h3>
+            <p class="text-[#49739c] mb-6">沒有找到符合條件的統計數據，請嘗試：</p>
+            <div class="text-left max-w-md mx-auto mb-6">
+                <ul class="text-[#49739c] text-sm space-y-2">
+                    <li>• 選擇不同的統計類別（打擊、投球、守備）</li>
+                    <li>• 調整時間範圍（單季、生涯、逐年）</li>
+                    <li>• 確認該球員在所選賽季有比賽記錄</li>
+                    <li>• 檢查球員是否為該類型的球員（投手/野手）</li>
+                </ul>
+            </div>
+            <div class="flex justify-center gap-4">
+                <button onclick="resetForm()" 
+                        class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    重新查詢
+                </button>
+                <a href="{% url 'mlb_app:player_detail' player_id %}" 
+                   class="px-6 py-3 border border-[#e7edf4] text-[#0d141c] rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                    返回球員頁面
+                </a>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Quick Links -->
+<div class="p-4">
+    <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm">
+        <h3 class="text-[#0d141c] text-lg font-bold mb-4">相關功能</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="{% url 'mlb_app:player_detail' player_id %}" 
+               class="p-4 text-center border border-[#e7edf4] rounded-lg hover:bg-blue-50 hover:border-blue-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-blue-600 mx-auto mb-2">
+                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM74.08,197.5a64,64,0,0,1,107.84,0,87.83,87.83,0,0,1-107.84,0ZM96,120a32,32,0,1,1,32,32A32,32,0,0,1,96,120Zm97.76,66.41a79.66,79.66,0,0,0-36.06-28.75,48,48,0,1,0-59.4,0,79.66,79.66,0,0,0-36.06,28.75,88,88,0,1,1,131.52,0Z"></path>
+                </svg>
+                <div class="text-sm font-medium text-[#0d141c]">球員資訊</div>
+            </a>
+            
+            <a href="{% url 'mlb_app:search_players' %}" 
+               class="p-4 text-center border border-[#e7edf4] rounded-lg hover:bg-green-50 hover:border-green-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-green-600 mx-auto mb-2">
+                    <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
+                </svg>
+                <div class="text-sm font-medium text-[#0d141c]">搜尋球員</div>
+            </a>
+            
+            <a href="{% url 'mlb_app:games' %}" 
+               class="p-4 text-center border border-[#e7edf4] rounded-lg hover:bg-purple-50 hover:border-purple-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-purple-600 mx-auto mb-2">
+                    <path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,184a8,8,0,0,1-16,0V168a8,8,0,0,1,16,0Zm0-40a8,8,0,0,1-16,0V112a8,8,0,0,1,16,0Zm48,40a8,8,0,0,1-16,0V136a8,8,0,0,1,16,0Zm0-64a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Zm48,64a8,8,0,0,1-16,0V152a8,8,0,0,1,16,0Zm0-48a8,8,0,0,1-16,0V72a8,8,0,0,1,16,0Zm48,48a8,8,0,0,1-16,0V120a8,8,0,0,1,16,0Z"></path>
+                </svg>
+                <div class="text-sm font-medium text-[#0d141c]">查看比賽</div>
+            </a>
+            
+            <a href="{% url 'mlb_app:index' %}" 
+               class="p-4 text-center border border-[#e7edf4] rounded-lg hover:bg-orange-50 hover:border-orange-200 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-orange-600 mx-auto mb-2">
+                    <path d="M224,115.55V208a16,16,0,0,1-16,16H168a16,16,0,0,1-16-16V168a8,8,0,0,0-8-8H112a8,8,0,0,0-8,8v40a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V115.55a16,16,0,0,1,5.17-11.78l80-75.48.11-.11a16,16,0,0,1,21.44,0,1.14,1.14,0,0,0,.11.11l80,75.48A16,16,0,0,1,224,115.55Z"></path>
+                </svg>
+                <div class="text-sm font-medium text-[#0d141c]">返回首頁</div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleSeasonInput(statType) {
+    const seasonInput = document.getElementById('season-input');
+    if (statType === 'season') {
+        seasonInput.style.display = 'block';
+    } else {
+        seasonInput.style.display = 'none';
+    }
+}
+
+function resetForm() {
+    const form = document.querySelector('form');
+    form.reset();
+    document.querySelector('select[name="stat_group"]').value = 'hitting';
+    document.querySelector('select[name="stat_type"]').value = 'season';
+    document.querySelector('input[name="season"]').value = new Date().getFullYear();
+    toggleSeasonInput('season');
+}
+
+function exportTable() {
+    const table = document.getElementById('stats-table');
+    if (!table) return;
+    
+    let csv = [];
+    const rows = table.querySelectorAll('tr');
+    
+    for (let i = 0; i < rows.length; i++) {
+        const row = [];
+        const cols = rows[i].querySelectorAll('td, th');
+        
+        for (let j = 0; j < cols.length; j++) {
+            row.push(cols[j].textContent.trim());
+        }
+        csv.push(row.join(','));
+    }
+    
+    const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+    const downloadLink = document.createElement('a');
+    
+    downloadLink.download = `player_${{{ player_id }}}_stats.csv`;
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = 'none';
+    
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+
+function printStats() {
+    window.print();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form when selections change (optional)
+    const selects = document.querySelectorAll('select');
+    selects.forEach(select => {
+        select.addEventListener('change', function() {
+            // Uncomment the following line to auto-submit on change
+            // this.form.submit();
+        });
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + E for export
+        if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+            e.preventDefault();
+            exportTable();
+        }
+        
+        // Ctrl/Cmd + P for print
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+            e.preventDefault();
+            printStats();
+        }
+        
+        // R for reset
+        if (e.key === 'r' || e.key === 'R') {
+            if (!isInputFocused()) {
+                resetForm();
+            }
+        }
+    });
+});
+
+function isInputFocused() {
+    const activeElement = document.activeElement;
+    return activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'SELECT' || activeElement.tagName === 'TEXTAREA');
+}
+</script>
+{% endblock %}

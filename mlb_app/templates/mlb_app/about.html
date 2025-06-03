@@ -1,0 +1,382 @@
+{% extends 'mlb_app/base.html' %}
+{% load static %}
+
+{% block title %}關於我們 - MLB 統計查詢系統{% endblock %}
+
+{% block description %}了解 MLB 統計查詢系統的開發背景、技術特色和服務理念。我們致力於提供最準確、最即時的棒球統計數據服務。{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="p-4 mb-8">
+    <div class="text-center mb-8">
+        <h1 class="text-[#0d141c] tracking-light text-[36px] font-bold leading-tight mb-4">
+            關於 MLB 統計查詢系統
+        </h1>
+        <p class="text-[#49739c] text-xl leading-relaxed max-w-3xl mx-auto">
+            我們致力於為棒球愛好者提供最準確、最即時的 MLB 統計數據和分析服務
+        </p>
+    </div>
+</div>
+
+<!-- Mission Section -->
+<div class="p-4 mb-8">
+    <div class="bg-gradient-to-r from-blue-600 to-green-600 rounded-xl text-white p-8 text-center">
+        <h2 class="text-2xl font-bold mb-4">我們的使命</h2>
+        <p class="text-lg opacity-90 max-w-2xl mx-auto">
+            讓每一位棒球愛好者都能輕鬆獲取專業級的 MLB 統計數據，
+            通過數據分析更深入地理解和享受棒球運動的魅力。
+        </p>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="p-4 mb-8">
+    <h2 class="text-[#0d141c] text-[28px] font-bold leading-tight mb-8 text-center">系統特色</h2>
+    
+    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <!-- Real-time Data -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-blue-600">
+                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216ZM128,64a8,8,0,0,1,8,8v48H184a8,8,0,0,1,0,16H128a8,8,0,0,1-8-8V72A8,8,0,0,1,128,64Z"></path>
+                </svg>
+            </div>
+            <h3 class="text-[#0d141c] text-lg font-bold mb-3">即時數據更新</h3>
+            <p class="text-[#49739c] text-sm leading-relaxed">
+                直接整合 MLB 官方 API，提供最新的比賽結果、球員統計和即時比分資訊。
+            </p>
+        </div>
+        
+        <!-- Comprehensive Stats -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-green-600">
+                    <path d="M232,208a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V48a8,8,0,0,1,16,0V156.69L82.34,114.34a8,8,0,0,1,11.32,0L128,148.69l42.34-42.35a8,8,0,0,1,11.32,0L216,140.69V48a8,8,0,0,1,16,0V208Z"></path>
+                </svg>
+            </div>
+            <h3 class="text-[#0d141c] text-lg font-bold mb-3">全面統計分析</h3>
+            <p class="text-[#49739c] text-sm leading-relaxed">
+                涵蓋打擊、投球、守備等各項詳細統計，支援單季、生涯和逐年數據查詢。
+            </p>
+        </div>
+        
+        <!-- User-friendly -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-purple-600">
+                    <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
+                </svg>
+            </div>
+            <h3 class="text-[#0d141c] text-lg font-bold mb-3">簡單易用</h3>
+            <p class="text-[#49739c] text-sm leading-relaxed">
+                直觀的使用者介面設計，無論是棒球新手還是資深球迷都能輕鬆使用。
+            </p>
+        </div>
+        
+        <!-- Multi-language -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-orange-600">
+                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM40,128a87.61,87.61,0,0,1,3.33-24H81.79a147.65,147.65,0,0,0,0,48H43.33A87.61,87.61,0,0,1,40,128Zm32-48H101.5a131.31,131.31,0,0,1,20.58-47.29A88.18,88.18,0,0,0,72,80ZM128,40c13.87,0,26.88,18.13,35.28,40H92.72C101.12,58.13,114.13,40,128,40ZM216,128a87.61,87.61,0,0,1-3.33,24H174.21a147.65,147.65,0,0,0,0-48h38.46A87.61,87.61,0,0,1,216,128Zm-32,48H154.5a131.31,131.31,0,0,1-20.58,47.29A88.18,88.18,0,0,0,184,176ZM128,216c-13.87,0-26.88-18.13-35.28-40h70.56C154.88,197.87,141.87,216,128,216Z"></path>
+                </svg>
+            </div>
+            <h3 class="text-[#0d141c] text-lg font-bold mb-3">繁體中文支援</h3>
+            <p class="text-[#49739c] text-sm leading-relaxed">
+                專為華語使用者設計的介面，提供完整的繁體中文支援和本地化體驗。
+            </p>
+        </div>
+        
+        <!-- Mobile Responsive -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-cyan-600">
+                    <path d="M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16ZM80,32h96a8,8,0,0,1,8,8V48H72V40A8,8,0,0,1,80,32ZM176,224H80a8,8,0,0,1-8-8V208H184v8A8,8,0,0,1,176,224ZM184,192H72V64H184Z"></path>
+                </svg>
+            </div>
+            <h3 class="text-[#0d141c] text-lg font-bold mb-3">響應式設計</h3>
+            <p class="text-[#49739c] text-sm leading-relaxed">
+                支援各種設備和螢幕尺寸，無論在電腦、平板或手機上都能獲得最佳體驗。
+            </p>
+        </div>
+        
+        <!-- Open Source -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-red-600">
+                    <path d="M128,20A108,108,0,1,0,236,128,108.12,108.12,0,0,0,128,20Zm0,192a84,84,0,1,1,84-84A84.09,84.09,0,0,1,128,212ZM172.42,72.84l-64,32a8.05,8.05,0,0,0-3.58,3.58l-32,64A8,8,0,0,0,80,184a8.1,8.1,0,0,0,3.58-.84l64-32a8.05,8.05,0,0,0,3.58-3.58l32-64a8,8,0,0,0-10.74-10.74ZM138,138,118,148l10-20Z"></path>
+                </svg>
+            </div>
+            <h3 class="text-[#0d141c] text-lg font-bold mb-3">開放透明</h3>
+            <p class="text-[#49739c] text-sm leading-relaxed">
+                基於開放原始碼技術建立，確保系統的可靠性、安全性和持續改進。
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Technology Stack -->
+<div class="p-4 mb-8">
+    <div class="bg-white rounded-xl border border-[#e7edf4] p-8 shadow-sm">
+        <h2 class="text-[#0d141c] text-[24px] font-bold leading-tight mb-6 text-center">技術架構</h2>
+        
+        <div class="grid gap-6 md:grid-cols-2">
+            <!-- Backend -->
+            <div>
+                <h3 class="text-[#0d141c] text-lg font-bold mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256" class="text-blue-600">
+                        <path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM112,168a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Zm48,0a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Z"></path>
+                    </svg>
+                    後端技術
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-green-100 rounded flex items-center justify-center">
+                            <span class="text-xs font-bold text-green-600">PY</span>
+                        </div>
+                        <div>
+                            <div class="font-medium text-[#0d141c]">Django 4.2</div>
+                            <div class="text-xs text-[#49739c]">Python Web 框架</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
+                            <span class="text-xs font-bold text-blue-600">API</span>
+                        </div>
+                        <div>
+                            <div class="font-medium text-[#0d141c]">MLB Stats API</div>
+                            <div class="text-xs text-[#49739c]">官方數據來源</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+                            <span class="text-xs font-bold text-gray-600">DB</span>
+                        </div>
+                        <div>
+                            <div class="font-medium text-[#0d141c]">SQLite</div>
+                            <div class="text-xs text-[#49739c]">輕量級資料庫</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Frontend -->
+            <div>
+                <h3 class="text-[#0d141c] text-lg font-bold mb-4 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256" class="text-purple-600">
+                        <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H216V88H40ZM40,200V104H216v96Z"></path>
+                    </svg>
+                    前端技術
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
+                            <span class="text-xs font-bold text-blue-600">TW</span>
+                        </div>
+                        <div>
+                            <div class="font-medium text-[#0d141c]">Tailwind CSS</div>
+                            <div class="text-xs text-[#49739c]">現代化 CSS 框架</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-yellow-100 rounded flex items-center justify-center">
+                            <span class="text-xs font-bold text-yellow-600">JS</span>
+                        </div>
+                        <div>
+                            <div class="font-medium text-[#0d141c]">JavaScript ES6+</div>
+                            <div class="text-xs text-[#49739c]">現代化互動體驗</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-orange-100 rounded flex items-center justify-center">
+                            <span class="text-xs font-bold text-orange-600">HTML</span>
+                        </div>
+                        <div>
+                            <div class="font-medium text-[#0d141c]">HTML5 語義化</div>
+                            <div class="text-xs text-[#49739c]">結構化標記</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Team Section -->
+<div class="p-4 mb-8">
+    <div class="bg-gray-50 rounded-xl p-8">
+        <h2 class="text-[#0d141c] text-[24px] font-bold leading-tight mb-6 text-center">開發團隊</h2>
+        
+        <div class="text-center max-w-2xl mx-auto">
+            <p class="text-[#49739c] text-lg leading-relaxed mb-6">
+                我們是一群熱愛棒球和技術的開發者，致力於透過科技讓更多人能夠深度享受棒球運動的樂趣。
+            </p>
+            
+            <div class="flex justify-center items-center gap-8 flex-wrap">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-blue-600">
+                            <path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"></path>
+                        </svg>
+                    </div>
+                    <div class="text-sm font-medium text-[#0d141c]">資深開發</div>
+                    <div class="text-xs text-[#49739c]">系統架構</div>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-green-600">
+                            <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H216V88H40ZM40,200V104H216v96Z"></path>
+                        </svg>
+                    </div>
+                    <div class="text-sm font-medium text-[#0d141c]">前端工程師</div>
+                    <div class="text-xs text-[#49739c]">介面設計</div>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-purple-600">
+                            <path d="M232,208a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V48a8,8,0,0,1,16,0V156.69L82.34,114.34a8,8,0,0,1,11.32,0L128,148.69l42.34-42.35a8,8,0,0,1,11.32,0L216,140.69V48a8,8,0,0,1,16,0V208Z"></path>
+                        </svg>
+                    </div>
+                    <div class="text-sm font-medium text-[#0d141c]">數據分析師</div>
+                    <div class="text-xs text-[#49739c]">統計分析</div>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-orange-600">
+                            <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM74.08,197.5a64,64,0,0,1,107.84,0,87.83,87.83,0,0,1-107.84,0ZM96,120a32,32,0,1,1,32,32A32,32,0,0,1,96,120Zm97.76,66.41a79.66,79.66,0,0,0-36.06-28.75,48,48,0,1,0-59.4,0,79.66,79.66,0,0,0-36.06,28.75,88,88,0,1,1,131.52,0Z"></path>
+                        </svg>
+                    </div>
+                    <div class="text-sm font-medium text-[#0d141c]">棒球專家</div>
+                    <div class="text-xs text-[#49739c]">領域知識</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Section -->
+<div class="p-4 mb-8">
+    <div class="bg-white rounded-xl border border-[#e7edf4] p-8 shadow-sm text-center">
+        <h2 class="text-[#0d141c] text-[24px] font-bold leading-tight mb-6">聯繫我們</h2>
+        
+        <p class="text-[#49739c] text-lg leading-relaxed mb-8 max-w-2xl mx-auto">
+            如果您有任何建議、問題或合作意向，歡迎隨時與我們聯繫。
+            我們重視每一位使用者的意見回饋。
+        </p>
+        
+        <div class="grid gap-6 md:grid-cols-3 max-w-2xl mx-auto">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-blue-600">
+                        <path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48ZM203.43,64,128,133.15,52.57,64ZM216,192H40V74.19l82.59,75.71a8,8,0,0,0,10.82,0L216,74.19V192Z"></path>
+                    </svg>
+                </div>
+                <div class="font-medium text-[#0d141c] mb-1">電子郵件</div>
+                <div class="text-sm text-[#49739c]">contact@mlbstats.com</div>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-green-600">
+                        <path d="M187.58,144.84l-32-16a8,8,0,0,0-8,.5l-14.69,9.8a40.55,40.55,0,0,1-16-16l9.8-14.69a8,8,0,0,0,.5-8l-16-32A8,8,0,0,0,104,64a40,40,0,0,0-40,40,88.1,88.1,0,0,0,88,88,40,40,0,0,0,40-40A8,8,0,0,0,187.58,144.84Z"></path>
+                    </svg>
+                </div>
+                <div class="font-medium text-[#0d141c] mb-1">技術支援</div>
+                <div class="text-sm text-[#49739c]">support@mlbstats.com</div>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-purple-600">
+                        <path d="M128,88a40,40,0,1,0,40,40A40,40,0,0,0,128,88Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,152ZM176,16H80A64,64,0,0,0,16,80v96a64,64,0,0,0,64,64h96a64,64,0,0,0,64-64V80A64,64,0,0,0,176,16Zm48,160a48,48,0,0,1-48,48H80a48,48,0,0,1-48-48V80A48,48,0,0,1,80,32h96a48,48,0,0,1,48,48ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z"></path>
+                    </svg>
+                </div>
+                <div class="font-medium text-[#0d141c] mb-1">社群媒體</div>
+                <div class="text-sm text-[#49739c]">@mlbstats_tw</div>
+            </div>
+        </div>
+        
+        <div class="mt-8">
+            <a href="mailto:contact@mlbstats.com" 
+               class="inline-flex items-center gap-2 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                    <path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48ZM203.43,64,128,133.15,52.57,64ZM216,192H40V74.19l82.59,75.71a8,8,0,0,0,10.82,0L216,74.19V192Z"></path>
+                </svg>
+                立即聯繫我們
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Footer Navigation -->
+<div class="p-4">
+    <div class="bg-gray-50 rounded-xl p-6">
+        <div class="flex flex-wrap justify-center gap-6 text-sm">
+            <a href="{% url 'mlb_app:index' %}" class="text-blue-600 hover:text-blue-800 transition-colors">返回首頁</a>
+            <span class="text-[#49739c]">•</span>
+            <a href="{% url 'mlb_app:help' %}" class="text-blue-600 hover:text-blue-800 transition-colors">使用說明</a>
+            <span class="text-[#49739c]">•</span>
+            <a href="{% url 'mlb_app:search_players' %}" class="text-blue-600 hover:text-blue-800 transition-colors">搜尋球員</a>
+            <span class="text-[#49739c]">•</span>
+            <a href="{% url 'mlb_app:games' %}" class="text-blue-600 hover:text-blue-800 transition-colors">查看比賽</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+    
+    // Add animation to feature cards on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animation = 'fadeInUp 0.6s ease-out';
+            }
+        });
+    }, observerOptions);
+    
+    // Observe feature cards
+    document.querySelectorAll('.bg-white.rounded-xl.border').forEach(card => {
+        observer.observe(card);
+    });
+});
+
+// Add CSS animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

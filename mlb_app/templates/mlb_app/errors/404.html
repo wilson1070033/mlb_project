@@ -1,0 +1,164 @@
+{% extends 'mlb_app/base.html' %}
+{% load static %}
+
+{% block title %}頁面未找到 (404) - MLB 統計查詢系統{% endblock %}
+
+{% block description %}抱歉，您訪問的頁面不存在。返回首頁查看最新的 MLB 比賽資訊和球員統計。{% endblock %}
+
+{% block main_class %}px-40 flex items-center{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-2xl mx-auto text-center">
+    <!-- 404 Icon -->
+    <div class="mb-8">
+        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" fill="currentColor" viewBox="0 0 256 256" class="text-[#49739c] mx-auto">
+            <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216ZM116,136V96a12,12,0,0,1,24,0v40a12,12,0,0,1-24,0Zm28,40a16,16,0,1,1-16-16A16,16,0,0,1,144,176Z"></path>
+        </svg>
+    </div>
+    
+    <!-- Error Message -->
+    <div class="mb-8">
+        <h1 class="text-6xl font-bold text-[#0d141c] mb-4">404</h1>
+        <h2 class="text-2xl font-bold text-[#0d141c] mb-4">頁面未找到</h2>
+        <p class="text-lg text-[#49739c] mb-6">
+            抱歉，您要找的頁面不存在或已被移動。<br>
+            可能是網址輸入錯誤，或者頁面已經被刪除。
+        </p>
+    </div>
+    
+    <!-- Suggested Actions -->
+    <div class="bg-white rounded-xl border border-[#e7edf4] p-8 shadow-sm mb-8">
+        <h3 class="text-lg font-bold text-[#0d141c] mb-6">您可以嘗試以下操作：</h3>
+        
+        <div class="grid gap-4 md:grid-cols-2">
+            <!-- Quick Search -->
+            <div class="text-left">
+                <h4 class="font-medium text-[#0d141c] mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path>
+                    </svg>
+                    快速搜尋
+                </h4>
+                <form method="get" action="{% url 'mlb_app:search_players' %}" class="flex gap-2">
+                    <input 
+                        name="q" 
+                        type="text" 
+                        placeholder="搜尋球員..."
+                        class="flex-1 px-3 py-2 text-sm border border-[#e7edf4] rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors">
+                        搜尋
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Browse Games -->
+            <div class="text-left">
+                <h4 class="font-medium text-[#0d141c] mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,184a8,8,0,0,1-16,0V168a8,8,0,0,1,16,0Zm0-40a8,8,0,0,1-16,0V112a8,8,0,0,1,16,0Zm48,40a8,8,0,0,1-16,0V136a8,8,0,0,1,16,0Zm0-64a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Zm48,64a8,8,0,0,1-16,0V152a8,8,0,0,1,16,0Zm0-48a8,8,0,0,1-16,0V72a8,8,0,0,1,16,0Zm48,48a8,8,0,0,1-16,0V120a8,8,0,0,1,16,0Z"></path>
+                    </svg>
+                    瀏覽比賽
+                </h4>
+                <form method="get" action="{% url 'mlb_app:games' %}" class="flex gap-2">
+                    <input 
+                        name="date" 
+                        type="date" 
+                        value="{{ 'today'|date:'Y-m-d' }}"
+                        class="flex-1 px-3 py-2 text-sm border border-[#e7edf4] rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                    <button type="submit" class="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors">
+                        查詢
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation Buttons -->
+    <div class="flex flex-wrap justify-center gap-4 mb-8">
+        <a href="{% url 'mlb_app:index' %}" 
+           class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M224,115.55V208a16,16,0,0,1-16,16H168a16,16,0,0,1-16-16V168a8,8,0,0,0-8-8H112a8,8,0,0,0-8,8v40a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V115.55a16,16,0,0,1,5.17-11.78l80-75.48.11-.11a16,16,0,0,1,21.44,0,1.14,1.14,0,0,0,.11.11l80,75.48A16,16,0,0,1,224,115.55Z"></path>
+            </svg>
+            返回首頁
+        </a>
+        
+        <button onclick="window.history.back()" 
+                class="px-8 py-3 border border-[#e7edf4] text-[#0d141c] rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path>
+            </svg>
+            上一頁
+        </button>
+        
+        <a href="{% url 'mlb_app:search_players' %}" 
+           class="px-8 py-3 border border-green-200 text-green-600 rounded-lg hover:bg-green-50 transition-colors font-medium flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M117.25,157.92a60,60,0,1,0-66.5,0A95.83,95.83,0,0,0,3.53,195.63a8,8,0,1,0,13.4,8.74,80,80,0,0,1,134.14,0,8,8,0,0,0,13.4-8.74A95.83,95.83,0,0,0,117.25,157.92ZM40,108a44,44,0,1,1,44,44A44.05,44.05,0,0,1,40,108Zm210.07,87.63a8,8,0,0,1-5.07,10.1,8.07,8.07,0,0,1-2.53.4,8,8,0,0,1-7.57-5.47,80,80,0,0,0-134.14,0,8,8,0,0,1-13.4-8.74,95.83,95.83,0,0,1,47.22-37.71,60,60,0,1,1,66.5,0A95.83,95.83,0,0,1,250.07,195.63ZM172,108a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,108Z"></path>
+            </svg>
+            搜尋球員
+        </a>
+    </div>
+    
+    <!-- Popular Links -->
+    <div class="bg-gray-50 rounded-xl p-6">
+        <h3 class="text-md font-bold text-[#0d141c] mb-4">熱門連結</h3>
+        <div class="flex flex-wrap justify-center gap-4 text-sm">
+            <a href="{% url 'mlb_app:games' %}" class="text-blue-600 hover:text-blue-800 transition-colors">今日比賽</a>
+            <span class="text-[#49739c]">•</span>
+            <a href="{% url 'mlb_app:search_players' %}?q=Shohei Ohtani" class="text-blue-600 hover:text-blue-800 transition-colors">大谷翔平</a>
+            <span class="text-[#49739c]">•</span>
+            <a href="{% url 'mlb_app:search_players' %}?q=Aaron Judge" class="text-blue-600 hover:text-blue-800 transition-colors">Aaron Judge</a>
+            <span class="text-[#49739c]">•</span>
+            <a href="{% url 'mlb_app:help' %}" class="text-blue-600 hover:text-blue-800 transition-colors">使用說明</a>
+            <span class="text-[#49739c]">•</span>
+            <a href="{% url 'mlb_app:about' %}" class="text-blue-600 hover:text-blue-800 transition-colors">關於我們</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-focus the search input
+    const searchInput = document.querySelector('input[name="q"]');
+    if (searchInput) {
+        searchInput.focus();
+    }
+    
+    // Add some fun animations
+    const icon = document.querySelector('svg');
+    if (icon) {
+        icon.style.animation = 'bounce 2s infinite';
+    }
+    
+    // Track 404 errors (if analytics is available)
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'page_view', {
+            page_title: '404 Error',
+            page_location: window.location.href
+        });
+    }
+});
+
+// Add CSS animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-10px);
+        }
+        60% {
+            transform: translateY(-5px);
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

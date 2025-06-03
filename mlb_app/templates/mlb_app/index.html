@@ -1,0 +1,293 @@
+{% extends 'mlb_app/base.html' %}
+{% load static %}
+
+{% block title %}MLB 統計查詢系統 - 首頁{% endblock %}
+
+{% block description %}專業的 MLB 統計查詢系統首頁，提供今日比賽資訊、熱門球員統計和即時數據查詢功能。{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="flex flex-wrap justify-between gap-3 p-4">
+    <div class="flex flex-col gap-2">
+        <h1 class="text-[#0d141c] tracking-light text-[32px] font-bold leading-tight min-w-72">
+            歡迎使用 MLB 統計查詢系統
+        </h1>
+        <p class="text-[#49739c] text-lg leading-relaxed">
+            獲取最新的 MLB 比賽資訊、球員統計數據和詳細分析
+        </p>
+    </div>
+    <div class="flex items-center gap-4">
+        <span class="text-[#49739c] text-sm">
+            今天是 {{ current_date|date:"Y年m月d日" }}
+        </span>
+    </div>
+</div>
+
+<!-- Quick Search Section -->
+<div class="p-4 mb-6">
+    <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm">
+        <h2 class="text-[#0d141c] text-xl font-bold mb-4">快速搜尋</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Player Search -->
+            <form method="get" action="{% url 'mlb_app:search_players' %}" class="flex flex-col gap-3">
+                <label class="text-[#0d141c] text-sm font-medium">搜尋球員</label>
+                <div class="flex gap-2">
+                    <input 
+                        name="q" 
+                        type="text" 
+                        placeholder="輸入球員姓名 (例如: Shohei Ohtani)"
+                        class="flex-1 px-4 py-2 border border-[#e7edf4] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                    >
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                        搜尋
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Games Search -->
+            <form method="get" action="{% url 'mlb_app:games' %}" class="flex flex-col gap-3">
+                <label class="text-[#0d141c] text-sm font-medium">查詢比賽</label>
+                <div class="flex gap-2">
+                    <input 
+                        name="date" 
+                        type="date" 
+                        value="{{ current_date|date:'Y-m-d' }}"
+                        class="flex-1 px-4 py-2 border border-[#e7edf4] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                    <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                        查詢
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Games Section -->
+<div class="p-4 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-[#0d141c] text-[22px] font-bold leading-tight tracking-[-0.015em]">
+            今日比賽 
+            {% if total_games_today %}
+                <span class="text-[#49739c] text-lg font-normal">({{ total_games_today }} 場)</span>
+            {% endif %}
+        </h2>
+        <a href="{% url 'mlb_app:games' %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
+            查看更多 →
+        </a>
+    </div>
+    
+    {% if today_games %}
+        <div class="grid gap-4">
+            {% for game in today_games %}
+                <div class="bg-white rounded-xl border border-[#e7edf4] p-4 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-stretch justify-between gap-4">
+                        <div class="flex flex-[2_2_0px] flex-col gap-4">
+                            <div class="flex flex-col gap-2">
+                                <h3 class="text-[#0d141c] text-base font-bold leading-tight">
+                                    {{ game.away_team.name }} vs {{ game.home_team.name }}
+                                </h3>
+                                <div class="flex items-center gap-4 text-sm text-[#49739c]">
+                                    <span>{{ game.start_time }}</span>
+                                    <span class="font-medium">{{ game.status }}</span>
+                                </div>
+                            </div>
+                            {% if game.away_team.score != '-' and game.home_team.score != '-' %}
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-medium text-[#0d141c]">{{ game.away_team.abbreviation }}</span>
+                                        <span class="text-lg font-bold text-[#0d141c]">{{ game.away_team.score }}</span>
+                                    </div>
+                                    <span class="text-[#49739c]">-</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-lg font-bold text-[#0d141c]">{{ game.home_team.score }}</span>
+                                        <span class="text-sm font-medium text-[#0d141c]">{{ game.home_team.abbreviation }}</span>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Game Image Placeholder -->
+                        <div class="w-full bg-gradient-to-br from-blue-100 to-green-100 bg-center bg-no-repeat aspect-video bg-cover rounded-xl flex-1 flex items-center justify-center">
+                            <div class="text-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256" class="text-blue-600 mx-auto mb-2">
+                                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM72,128a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,128Z"></path>
+                                </svg>
+                                <span class="text-xs text-blue-600 font-medium">MLB</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-white rounded-xl border border-[#e7edf4] p-8 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 256 256" class="text-[#49739c] mx-auto mb-4">
+                <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM72,128a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,128Z"></path>
+            </svg>
+            <h3 class="text-[#0d141c] text-lg font-bold mb-2">今日無比賽</h3>
+            <p class="text-[#49739c]">今天沒有安排 MLB 比賽，請查看其他日期的比賽安排。</p>
+            <a href="{% url 'mlb_app:games' %}" class="inline-block mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                查看其他日期
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Popular Players Section -->
+<div class="p-4 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-[#0d141c] text-[22px] font-bold leading-tight tracking-[-0.015em]">熱門球員</h2>
+        <a href="{% url 'mlb_app:search_players' %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
+            搜尋更多球員 →
+        </a>
+    </div>
+    
+    {% if popular_players %}
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {% for player in popular_players %}
+                <div class="bg-white rounded-xl border border-[#e7edf4] p-4 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-center gap-4">
+                        <!-- Player Avatar -->
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-green-100 rounded-full flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-blue-600">
+                                <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM74.08,197.5a64,64,0,0,1,107.84,0,87.83,87.83,0,0,1-107.84,0ZM96,120a32,32,0,1,1,32,32A32,32,0,0,1,96,120Zm97.76,66.41a79.66,79.66,0,0,0-36.06-28.75,48,48,0,1,0-59.4,0,79.66,79.66,0,0,0-36.06,28.75,88,88,0,1,1,131.52,0Z"></path>
+                            </svg>
+                        </div>
+                        
+                        <div class="flex-1">
+                            <h3 class="text-[#0d141c] text-base font-bold leading-tight">{{ player.fullName }}</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-[#49739c] text-sm">{{ player.currentTeam }}</span>
+                                <span class="text-[#49739c] text-sm">•</span>
+                                <span class="text-[#49739c] text-sm">{{ player.primaryPosition }}</span>
+                            </div>
+                        </div>
+                        
+                        <a href="{% url 'mlb_app:player_detail' player.id %}" 
+                           class="text-blue-600 hover:text-blue-800 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                                <path d="M200,64V168a8,8,0,0,1-16,0V83.31L69.66,197.66a8,8,0,0,1-11.32-11.32L172.69,72H88a8,8,0,0,1,0-16H192A8,8,0,0,1,200,64Z"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-white rounded-xl border border-[#e7edf4] p-8 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 256 256" class="text-[#49739c] mx-auto mb-4">
+                <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM74.08,197.5a64,64,0,0,1,107.84,0,87.83,87.83,0,0,1-107.84,0ZM96,120a32,32,0,1,1,32,32A32,32,0,0,1,96,120Zm97.76,66.41a79.66,79.66,0,0,0-36.06-28.75,48,48,0,1,0-59.4,0,79.66,79.66,0,0,0-36.06,28.75,88,88,0,1,1,131.52,0Z"></path>
+            </svg>
+            <h3 class="text-[#0d141c] text-lg font-bold mb-2">暫無球員資料</h3>
+            <p class="text-[#49739c]">目前無法載入熱門球員資訊，請稍後再試或使用搜尋功能。</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Feature Cards Section -->
+<div class="p-4">
+    <h2 class="text-[#0d141c] text-[22px] font-bold leading-tight tracking-[-0.015em] mb-4">主要功能</h2>
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- Games Feature -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-blue-600">
+                    <path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,184a8,8,0,0,1-16,0V168a8,8,0,0,1,16,0Zm0-40a8,8,0,0,1-16,0V112a8,8,0,0,1,16,0Zm48,40a8,8,0,0,1-16,0V136a8,8,0,0,1,16,0Zm0-64a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Zm48,64a8,8,0,0,1-16,0V152a8,8,0,0,1,16,0Zm0-48a8,8,0,0,1-16,0V72a8,8,0,0,1,16,0Zm48,48a8,8,0,0,1-16,0V120a8,8,0,0,1,16,0Z"></path>
+                </svg>
+            </div>
+            <h3 class="text-[#0d141c] text-lg font-bold mb-2">比賽查詢</h3>
+            <p class="text-[#49739c] text-sm mb-4">查看每日 MLB 比賽安排、即時比分和比賽結果</p>
+            <a href="{% url 'mlb_app:games' %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
+                開始查詢 →
+            </a>
+        </div>
+        
+        <!-- Players Feature -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-green-600">
+                    <path d="M117.25,157.92a60,60,0,1,0-66.5,0A95.83,95.83,0,0,0,3.53,195.63a8,8,0,1,0,13.4,8.74,80,80,0,0,1,134.14,0,8,8,0,0,0,13.4-8.74A95.83,95.83,0,0,0,117.25,157.92ZM40,108a44,44,0,1,1,44,44A44.05,44.05,0,0,1,40,108Zm210.07,87.63a8,8,0,0,1-5.07,10.1,8.07,8.07,0,0,1-2.53.4,8,8,0,0,1-7.57-5.47,80,80,0,0,0-134.14,0,8,8,0,0,1-13.4-8.74,95.83,95.83,0,0,1,47.22-37.71,60,60,0,1,1,66.5,0A95.83,95.83,0,0,1,250.07,195.63ZM172,108a44,44,0,1,0-44,44A44.05,44.05,0,0,0,172,108Z"></path>
+                </svg>
+            </div>
+            <h3 class="text-[#0d141c] text-lg font-bold mb-2">球員搜尋</h3>
+            <p class="text-[#49739c] text-sm mb-4">搜尋任何 MLB 球員，查看詳細資料和統計數據</p>
+            <a href="{% url 'mlb_app:search_players' %}" class="text-green-600 hover:text-green-800 text-sm font-medium transition-colors">
+                開始搜尋 →
+            </a>
+        </div>
+        
+        <!-- Stats Feature -->
+        <div class="bg-white rounded-xl border border-[#e7edf4] p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-purple-600">
+                    <path d="M232,208a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V48a8,8,0,0,1,16,0V156.69L82.34,114.34a8,8,0,0,1,11.32,0L128,148.69l42.34-42.35a8,8,0,0,1,11.32,0L216,140.69V48a8,8,0,0,1,16,0V208Z"></path>
+                </svg>
+            </div>
+            <h3 class="text-[#0d141c] text-lg font-bold mb-2">統計分析</h3>
+            <p class="text-[#49739c] text-sm mb-4">詳細的球員統計數據分析和視覺化圖表</p>
+            <a href="{% url 'mlb_app:search_players' %}" class="text-purple-600 hover:text-purple-800 text-sm font-medium transition-colors">
+                查看統計 →
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Loading indicator (hidden by default, shown via JavaScript) -->
+<div id="loading-indicator" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 flex items-center gap-4">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span class="text-gray-700">載入中...</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-refresh today's games every 5 minutes
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up auto-refresh for live games (optional)
+    const refreshInterval = 5 * 60 * 1000; // 5 minutes
+    
+    function refreshGames() {
+        // Only refresh if there are games today
+        if ({{ today_games|length }} > 0) {
+            // Show loading indicator
+            document.getElementById('loading-indicator').classList.remove('hidden');
+            
+            // Reload the page to get fresh data
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        }
+    }
+    
+    // Auto-refresh every 5 minutes (only if user is actively using the page)
+    let isActive = true;
+    document.addEventListener('visibilitychange', function() {
+        isActive = !document.hidden;
+    });
+    
+    setInterval(() => {
+        if (isActive) {
+            refreshGames();
+        }
+    }, refreshInterval);
+    
+    // Add smooth scrolling for internal links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

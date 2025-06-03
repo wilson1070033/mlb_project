@@ -1,0 +1,204 @@
+{% extends 'mlb_app/base.html' %}
+{% load static %}
+
+{% block title %}服務器錯誤 (500) - MLB 統計查詢系統{% endblock %}
+
+{% block description %}服務器發生內部錯誤，我們正在努力修復。請稍後再試或聯繫我們的技術支援團隊。{% endblock %}
+
+{% block main_class %}px-40 flex items-center{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-2xl mx-auto text-center">
+    <!-- 500 Icon -->
+    <div class="mb-8">
+        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" fill="currentColor" viewBox="0 0 256 256" class="text-red-500 mx-auto">
+            <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM104,48a24,24,0,1,1-24,24A24,24,0,0,1,104,48Zm8,144a8,8,0,0,1-16,0V112a8,8,0,0,1,16,0Zm40-64a8,8,0,0,1-16,0V96a8,8,0,0,1,16,0Z"></path>
+        </svg>
+    </div>
+    
+    <!-- Error Message -->
+    <div class="mb-8">
+        <h1 class="text-6xl font-bold text-[#0d141c] mb-4">500</h1>
+        <h2 class="text-2xl font-bold text-[#0d141c] mb-4">服務器內部錯誤</h2>
+        <p class="text-lg text-[#49739c] mb-6">
+            抱歉，服務器發生了內部錯誤。<br>
+            我們的技術團隊已經收到錯誤報告，正在努力修復這個問題。
+        </p>
+    </div>
+    
+    <!-- Error Details -->
+    <div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
+        <h3 class="text-lg font-bold text-red-800 mb-4 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216ZM116,136V96a12,12,0,0,1,24,0v40a12,12,0,0,1-24,0Zm28,40a16,16,0,1,1-16-16A16,16,0,0,1,144,176Z"></path>
+            </svg>
+            發生了什麼？
+        </h3>
+        <div class="text-left text-red-700 space-y-2">
+            <p>• 服務器處理您的請求時遇到了意外錯誤</p>
+            <p>• 可能是 MLB API 服務暫時不可用</p>
+            <p>• 或者是我們的系統正在進行維護</p>
+            <p>• 錯誤時間：{{ 'now'|date:'Y-m-d H:i:s' }}</p>
+        </div>
+    </div>
+    
+    <!-- Suggested Actions -->
+    <div class="bg-white rounded-xl border border-[#e7edf4] p-8 shadow-sm mb-8">
+        <h3 class="text-lg font-bold text-[#0d141c] mb-6">您可以嘗試以下操作：</h3>
+        
+        <div class="grid gap-6 md:grid-cols-2 text-left">
+            <!-- Refresh -->
+            <div>
+                <h4 class="font-medium text-[#0d141c] mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M197.67,186.37a8,8,0,0,1,0,11.29C196.58,198.73,170.82,224,128,224c-37.39,0-64.53-22.4-80-39.85V208a8,8,0,0,1-16,0V160a8,8,0,0,1,8-8H88a8,8,0,0,1,0,16H55.44C67.76,183.35,93,208,128,208c36.52,0,58.14-21.46,58.36-21.68A8,8,0,0,1,197.67,186.37ZM216,40a8,8,0,0,0-8,8V71.85C192.53,54.4,165.39,32,128,32,85.18,32,59.42,57.27,58.33,58.34a8,8,0,0,0,11.34,11.32C69.86,69.46,91.48,48,128,48c35,0,60.24,24.65,72.56,40H168a8,8,0,0,0,0,16h48a8,8,0,0,0,8-8V48A8,8,0,0,0,216,40Z"></path>
+                    </svg>
+                    重新整理頁面
+                </h4>
+                <p class="text-sm text-[#49739c] mb-3">有時候重新載入頁面可以解決暫時性的問題。</p>
+                <button onclick="window.location.reload()" 
+                        class="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors">
+                    重新整理
+                </button>
+            </div>
+            
+            <!-- Try Later -->
+            <div>
+                <h4 class="font-medium text-[#0d141c] mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216ZM128,64a8,8,0,0,1,8,8v48H184a8,8,0,0,1,0,16H128a8,8,0,0,1-8-8V72A8,8,0,0,1,128,64Z"></path>
+                    </svg>
+                    稍後再試
+                </h4>
+                <p class="text-sm text-[#49739c] mb-3">如果是系統維護，通常會在幾分鐘內恢復正常。</p>
+                <p class="text-xs text-[#6b7280]">建議等待 5-10 分鐘後再試</p>
+            </div>
+            
+            <!-- Alternative Actions -->
+            <div>
+                <h4 class="font-medium text-[#0d141c] mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M224,115.55V208a16,16,0,0,1-16,16H168a16,16,0,0,1-16-16V168a8,8,0,0,0-8-8H112a8,8,0,0,0-8,8v40a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V115.55a16,16,0,0,1,5.17-11.78l80-75.48.11-.11a16,16,0,0,1,21.44,0,1.14,1.14,0,0,0,.11.11l80,75.48A16,16,0,0,1,224,115.55Z"></path>
+                    </svg>
+                    瀏覽其他頁面
+                </h4>
+                <p class="text-sm text-[#49739c] mb-3">問題可能只影響特定功能，其他頁面可能正常運作。</p>
+                <a href="{% url 'mlb_app:index' %}" 
+                   class="inline-block px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors">
+                    返回首頁
+                </a>
+            </div>
+            
+            <!-- Contact Support -->
+            <div>
+                <h4 class="font-medium text-[#0d141c] mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                        <path d="M224,48H32a8,8,0,0,0-8,8V192a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A8,8,0,0,0,224,48ZM203.43,64,128,133.15,52.57,64ZM216,192H40V74.19l82.59,75.71a8,8,0,0,0,10.82,0L216,74.19V192Z"></path>
+                    </svg>
+                    聯繫技術支援
+                </h4>
+                <p class="text-sm text-[#49739c] mb-3">如果問題持續發生，請聯繫我們的技術支援團隊。</p>
+                <a href="mailto:support@mlbstats.example.com" 
+                   class="inline-block px-4 py-2 border border-[#e7edf4] text-[#0d141c] text-sm rounded hover:bg-gray-50 transition-colors">
+                    發送郵件
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation Buttons -->
+    <div class="flex flex-wrap justify-center gap-4 mb-8">
+        <a href="{% url 'mlb_app:index' %}" 
+           class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M224,115.55V208a16,16,0,0,1-16,16H168a16,16,0,0,1-16-16V168a8,8,0,0,0-8-8H112a8,8,0,0,0-8,8v40a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V115.55a16,16,0,0,1,5.17-11.78l80-75.48.11-.11a16,16,0,0,1,21.44,0,1.14,1.14,0,0,0,.11.11l80,75.48A16,16,0,0,1,224,115.55Z"></path>
+            </svg>
+            返回首頁
+        </a>
+        
+        <button onclick="window.history.back()" 
+                class="px-8 py-3 border border-[#e7edf4] text-[#0d141c] rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path>
+            </svg>
+            上一頁
+        </a>
+        
+        <button onclick="window.location.reload()" 
+                class="px-8 py-3 border border-orange-200 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors font-medium flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                <path d="M197.67,186.37a8,8,0,0,1,0,11.29C196.58,198.73,170.82,224,128,224c-37.39,0-64.53-22.4-80-39.85V208a8,8,0,0,1-16,0V160a8,8,0,0,1,8-8H88a8,8,0,0,1,0,16H55.44C67.76,183.35,93,208,128,208c36.52,0,58.14-21.46,58.36-21.68A8,8,0,0,1,197.67,186.37ZM216,40a8,8,0,0,0-8,8V71.85C192.53,54.4,165.39,32,128,32,85.18,32,59.42,57.27,58.33,58.34a8,8,0,0,0,11.34,11.32C69.86,69.46,91.48,48,128,48c35,0,60.24,24.65,72.56,40H168a8,8,0,0,0,0,16h48a8,8,0,0,0,8-8V48A8,8,0,0,0,216,40Z"></path>
+            </svg>
+            重新整理
+        </button>
+    </div>
+    
+    <!-- Status Information -->
+    <div class="bg-gray-50 rounded-xl p-6">
+        <h3 class="text-md font-bold text-[#0d141c] mb-4">系統狀態</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div class="flex items-center justify-center gap-2">
+                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                <span class="text-[#49739c]">目前服務狀態：異常</span>
+            </div>
+            <div class="flex items-center justify-center gap-2">
+                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <span class="text-[#49739c]">預計修復時間：調查中</span>
+            </div>
+            <div class="flex items-center justify-center gap-2">
+                <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span class="text-[#49739c]">錯誤 ID：500-{{ 'now'|date:'YmdHis' }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh every 30 seconds to check if service is restored
+    let refreshCount = 0;
+    const maxRefresh = 5; // Maximum 5 auto-refreshes
+    
+    const autoRefresh = setInterval(() => {
+        refreshCount++;
+        if (refreshCount >= maxRefresh) {
+            clearInterval(autoRefresh);
+            return;
+        }
+        
+        // Check if the service is back online
+        fetch('{% url "mlb_app:index" %}', { method: 'HEAD' })
+            .then(response => {
+                if (response.ok) {
+                    // Service is back online, redirect to homepage
+                    window.location.href = '{% url "mlb_app:index" %}';
+                }
+            })
+            .catch(() => {
+                // Still having issues, continue waiting
+            });
+    }, 30000); // Check every 30 seconds
+    
+    // Add visual feedback for auto-refresh
+    if (refreshCount < maxRefresh) {
+        const statusDiv = document.querySelector('.bg-gray-50.rounded-xl.p-6');
+        if (statusDiv) {
+            const refreshInfo = document.createElement('p');
+            refreshInfo.className = 'text-xs text-[#6b7280] mt-2';
+            refreshInfo.textContent = '系統將自動檢查服務恢復狀態...';
+            statusDiv.appendChild(refreshInfo);
+        }
+    }
+    
+    // Track 500 errors (if analytics is available)
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'exception', {
+            description: '500 Internal Server Error',
+            fatal: false
+        });
+    }
+});
+</script>
+{% endblock %}
