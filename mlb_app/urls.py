@@ -21,6 +21,7 @@ URL 設計原則：
 
 from django.urls import path
 from . import views
+from django.contrib.auth import views as auth_views # For Login/Logout
 
 # 應用程式的命名空間
 # 這讓我們可以在模板和其他地方使用 'mlb_app:view_name' 的方式引用 URL
@@ -56,6 +57,15 @@ urlpatterns = [
     # 功能: 顯示球員的詳細統計數據，支援不同的查詢參數
     # 例如: /players/660271/stats/?stat_group=hitting&stat_type=season&season=2024
     path('players/<int:player_id>/stats/', views.player_stats, name='player_stats'),
+
+    # 使用者註冊
+    # URL: /register/
+    # 功能: 顯示註冊表單並處理註冊請求
+    path('register/', views.register_request, name='register'),
+
+    # 使用者登入/登出
+    path('login/', auth_views.LoginView.as_view(template_name='mlb_app/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'), # Redirect to home page after logout
     
     # API 端點 - 這些 URL 返回 JSON 數據，供前端 JavaScript 使用
     # 
