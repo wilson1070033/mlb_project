@@ -389,7 +389,7 @@ function exportTable() {
     const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
     const downloadLink = document.createElement('a');
     
-    downloadLink.download = `player_${{{ player_id }}}_stats.csv`;
+    downloadLink.download = `player_${"{{ player_id }}"}_stats.csv`;
     downloadLink.href = window.URL.createObjectURL(csvFile);
     downloadLink.style.display = 'none';
     
