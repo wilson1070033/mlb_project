@@ -185,9 +185,12 @@ def search_players(request):
     query = request.GET.get('q', '').strip()
     page = request.GET.get('page', 1)
     
+    search_suggestions = ["Shohei Ohtani", "Aaron Judge", "Mookie Betts", "Fernando Tatis Jr.", "Mike Trout", "Ronald Acuna Jr.", "Manny Machado", "Juan Soto"]
+
     context = {
         'page_title': '球員搜尋',
         'query': query,
+        'search_suggestions': search_suggestions,
     }
     
     if not query:
@@ -207,6 +210,7 @@ def search_players(request):
     # 驗證搜尋關鍵字
     if len(query) < 2:
         messages.warning(request, "請輸入至少2個字符進行搜尋。")
+        # Even if query is too short, we still want to pass suggestions
         return render(request, 'mlb_app/search_players.html', context)
     
     try:
