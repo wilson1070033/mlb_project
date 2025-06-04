@@ -321,7 +321,7 @@ ML_SETTINGS = {
         'MODEL_UPDATE_INTERVAL_SECONDS': 3600,  # 1小時更新一次
         'CACHE_TIMEOUT': 1800,                  # 30分鐘快取
         'MAX_RECOMMENDATIONS': 8,               # 最大推薦數量
-        'MIN_SIMILARITY_THRESHOLD': 0.5,        # 最小相似度闾值
+        'MIN_SIMILARITY_THRESHOLD': 0.5,        # 最小相似度閾值
     },
     # 表現預測設定
     'PERFORMANCE_PREDICTION': {
