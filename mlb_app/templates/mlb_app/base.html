@@ -11,12 +11,15 @@
     <!-- Google Fonts -->
     <link rel="stylesheet" as="style" onload="this.rel='stylesheet'" 
           href="https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;700">
+
+    <!-- Main Stylesheet -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     
     <!-- Custom CSS -->
-    {% load static %}
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     
     <!-- Favicon -->
