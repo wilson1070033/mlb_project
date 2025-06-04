@@ -654,6 +654,11 @@ def help_page(request):
     }
     return render(request, 'mlb_app/help.html', context)
 
+# New front-end demo view
+def frontend_demo(request):
+    """Showcase the new frontend template."""
+    return render(request, "mlb_app/new_frontend.html")
+
 
 # 錯誤處理視圖
 def handler404(request, exception):
