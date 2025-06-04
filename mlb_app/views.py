@@ -285,7 +285,8 @@ def player_detail(request, player_id):
         'player_id': player_id,
         'quick_stats': None,
         'quick_stats_type': None,
-        'recent_performance_available': False, # Placeholder for future implementation
+        'recent_game_logs': None, # Initialize recent_game_logs
+        'recent_performance_available': False,
     }
 
     try:
@@ -297,6 +298,36 @@ def player_detail(request, player_id):
 
         context['player_info'] = player_info
         context['page_title'] = f"{player_info.get('fullName', player_id)} 詳細資訊"
+
+        # Attempt to fetch recent game logs from local DB
+        try:
+            # Assuming player_info.get('id') is the MLB ID stored in your Player model
+            local_player_id = player_info.get('id')
+            if local_player_id:
+                # Try to find the player in the local database
+                # This assumes your Player model has a field like 'mlb_id' that stores this ID
+                player_instance = Player.objects.filter(mlb_id=local_player_id).first()
+                if player_instance:
+                    # Query the GameLog model for the last 5 games for that player
+                    recent_game_logs = GameLog.objects.filter(player=player_instance).order_by('-game_date')[:5]
+                    if recent_game_logs.exists():
+                        context['recent_game_logs'] = recent_game_logs
+                        context['recent_performance_available'] = True
+                        logger.info(f"Fetched {len(recent_game_logs)} recent game logs for player {player_instance.mlb_id} from DB.")
+                    else:
+                        logger.info(f"No recent game logs found in DB for player {player_instance.mlb_id}.")
+                        context['recent_performance_available'] = False
+                else:
+                    logger.info(f"Local player with mlb_id {local_player_id} not found in DB.")
+                    context['recent_performance_available'] = False
+            else:
+                logger.warning(f"Could not get 'id' from player_info for player_id {player_id}.")
+                context['recent_performance_available'] = False
+        except Exception as e_gamelog:
+            logger.error(f"Error fetching recent game logs for player_id {player_id}: {e_gamelog}")
+            # Keep recent_performance_available as False if there's an error
+            context['recent_performance_available'] = False
+
 
         # 2. Fetch Stats for Quick Stats and other sections
         # We fetch both hitting and pitching for the latest season to determine quick stats
@@ -641,3 +672,123 @@ def handler500(request):
     return render(request, 'mlb_app/errors/500.html', {
         'page_title': '服務器錯誤'
     }, status=500)
+
+
+@require_http_methods(["GET"])
+def teams_list(request):
+    """
+    所有球隊列表視圖
+
+    這個視圖顯示系統中所有 MLB 球隊的列表。
+    使用者可以點擊球隊名稱查看詳細資訊（未來實現）。
+
+    功能：
+    - 從數據庫獲取所有球隊
+    - 按名稱排序球隊
+    - 渲染球隊列表模板
+    """
+    try:
+        teams = Team.objects.all().order_by('name')
+
+        context = {
+            'teams': teams,
+            'page_title': '所有球隊',
+            'total_teams': teams.count()
+        }
+
+        logger.info(f"成功載入 {len(teams)} 個球隊的列表頁面。")
+
+    except Exception as e:
+        logger.error(f"載入球隊列表時發生錯誤: {str(e)}")
+        messages.error(request, "載入球隊列表時發生錯誤，請稍後再試。")
+        context = {
+            'teams': [],
+            'page_title': '所有球隊',
+            'total_teams': 0
+        }
+
+    return render(request, 'mlb_app/teams_list.html', context)
+
+
+@require_http_methods(["GET"])
+def team_detail(request, team_id):
+    """
+    球隊詳細資訊視圖
+
+    顯示特定球隊的詳細資訊。
+
+    URL 參數：
+    - team_id: 球隊的 MLB ID
+
+    功能：
+    - 獲取指定 ID 的球隊資訊
+    - 處理球隊不存在的情況
+    - 渲染球隊詳細資訊模板
+    """
+    try:
+        team = get_object_or_404(Team, mlb_id=team_id)
+
+        context = {
+            'team': team,
+            'page_title': f"{team.name} 詳細資訊"
+        }
+
+        logger.info(f"成功載入球隊 {team.name} (ID: {team_id}) 的詳細資訊頁面。")
+
+    except Http404:
+        logger.warning(f"嘗試訪問不存在的球隊 ID: {team_id}")
+        # get_object_or_404 will raise Http404, which Django handles by showing a 404 page.
+        # So we just re-raise it or let it propagate.
+        raise
+    except Exception as e:
+        logger.error(f"載入球隊 ID {team_id} 詳細資訊時發生錯誤: {str(e)}")
+        messages.error(request, "載入球隊詳細資訊時發生錯誤，請稍後再試。")
+        # Redirect to teams list or show a generic error page.
+        # For now, redirecting to teams_list if there's an unexpected error.
+        return redirect('mlb_app:teams_list')
+
+    return render(request, 'mlb_app/team_detail.html', context)
+
+
+@require_http_methods(["GET"])
+def team_roster(request, team_id):
+    """
+    球隊球員名單視圖
+
+    顯示特定球隊的球員名單。
+
+    URL 參數：
+    - team_id: 球隊的 MLB ID
+
+    功能：
+    - 獲取指定 ID 的球隊資訊
+    - 獲取該球隊的所有球員
+    - 按球員姓名排序
+    - 處理球隊不存在的情況
+    - 渲染球隊球員名單模板
+    """
+    try:
+        team = get_object_or_404(Team, mlb_id=team_id)
+        # Assuming Player model has a ForeignKey 'current_team' to Team model
+        # And Player model has 'full_name' for ordering.
+        players = Player.objects.filter(current_team=team).order_by('full_name')
+
+        context = {
+            'team': team,
+            'players': players,
+            'page_title': f'{team.name} 球員名單',
+            'total_players': players.count()
+        }
+
+        logger.info(f"成功載入球隊 {team.name} (ID: {team_id}) 的 {players.count()} 位球員名單。")
+
+    except Http404:
+        logger.warning(f"嘗試訪問不存在球隊 ID {team_id} 的球員名單。")
+        raise # Re-raise Http404 to let Django handle it
+    except Exception as e:
+        logger.error(f"載入球隊 ID {team_id} 球員名單時發生錯誤: {str(e)}")
+        messages.error(request, "載入球員名單時發生錯誤，請稍後再試。")
+        # Redirect to team detail page if there's an unexpected error.
+        return redirect('mlb_app:team_detail', team_id=team_id)
+
+    return render(request, 'mlb_app/team_roster.html', context)

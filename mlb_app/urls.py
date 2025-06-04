@@ -119,6 +119,21 @@ urlpatterns = [
     # URL: /help/
     # 功能: 顯示使用說明和常見問題
     path('help/', views.help_page, name='help'),
+
+    # 球隊列表
+    # URL: /teams/
+    # 功能: 顯示所有球隊的列表
+    path('teams/', views.teams_list, name='teams_list'),
+
+    # 球隊詳細資訊
+    # URL: /teams/123/
+    # 功能: 顯示特定球隊的詳細資訊 (123 為 team_id, 即 mlb_id)
+    path('teams/<int:team_id>/', views.team_detail, name='team_detail'),
+
+    # 球隊球員名單
+    # URL: /teams/123/roster/
+    # 功能: 顯示特定球隊的球員名單
+    path('teams/<int:team_id>/roster/', views.team_roster, name='team_roster'),
 ]
 
 # URL 設計說明：

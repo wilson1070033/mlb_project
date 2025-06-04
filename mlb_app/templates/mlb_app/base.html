@@ -69,6 +69,8 @@
                            href="{% url 'mlb_app:games' %}">比賽</a>
                         <a class="text-[#0d141c] text-sm font-medium leading-normal hover:text-blue-600 transition-colors {% if 'players' in request.resolver_match.url_name %}text-blue-600 font-bold{% endif %}" 
                            href="{% url 'mlb_app:search_players' %}">球員</a>
+                        <a class="text-[#0d141c] text-sm font-medium leading-normal hover:text-blue-600 transition-colors {% if request.resolver_match.url_name == 'teams_list' or request.resolver_match.url_name == 'team_detail' or request.resolver_match.url_name == 'team_roster' %}text-blue-600 font-bold{% endif %}"
+                           href="{% url 'mlb_app:teams_list' %}">球隊</a>
                         <a class="text-[#0d141c] text-sm font-medium leading-normal hover:text-blue-600 transition-colors {% if request.resolver_match.url_name == 'about' %}text-blue-600 font-bold{% endif %}" 
                            href="{% url 'mlb_app:about' %}">關於</a>
                         <a class="text-[#0d141c] text-sm font-medium leading-normal hover:text-blue-600 transition-colors {% if request.resolver_match.url_name == 'help' %}text-blue-600 font-bold{% endif %}" 
