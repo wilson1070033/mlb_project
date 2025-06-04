@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeTooltips();
     initializeCharts();
     initializeAIFeatures();
-    
+    initializeThemeToggle();
+
     console.log('MLB 統計查詢系統已載入完成');
 });
 
@@ -489,3 +490,35 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// 初始化主題切換
+function initializeThemeToggle() {
+    const toggleBtn = document.getElementById('theme-toggle');
+    if (!toggleBtn) return;
+
+    const iconSun = document.getElementById('theme-icon-sun');
+    const iconMoon = document.getElementById('theme-icon-moon');
+
+    function applyTheme(dark) {
+        if (dark) {
+            document.documentElement.classList.add('dark');
+            iconSun && iconSun.classList.remove('hidden');
+            iconMoon && iconMoon.classList.add('hidden');
+        } else {
+            document.documentElement.classList.remove('dark');
+            iconSun && iconSun.classList.add('hidden');
+            iconMoon && iconMoon.classList.remove('hidden');
+        }
+    }
+
+    const stored = localStorage.getItem('theme');
+    if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        applyTheme(true);
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        applyTheme(isDark);
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+}
