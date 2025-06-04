@@ -1,0 +1,581 @@
+{% extends "mlb_app/base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .prediction-header {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .prediction-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M20 20c0-11.046-8.954-20-20-20v20h20z'/%3E%3C/g%3E%3C/svg%3E") repeat;
+    }
+    
+    .prediction-card {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    
+    .prediction-result {
+        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+        border: 2px solid #22c55e;
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+        margin: 2rem 0;
+        position: relative;
+    }
+    
+    .prediction-value {
+        font-size: 4rem;
+        font-weight: 800;
+        color: #16a34a;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 0.5rem;
+        position: relative;
+    }
+    
+    .prediction-label {
+        font-size: 1.25rem;
+        color: #166534;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .confidence-indicator {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        color: #166534;
+    }
+    
+    .analysis-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .analysis-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+    
+    .analysis-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .factor-positive {
+        border-left: 4px solid #22c55e;
+        background: #f0fdf4;
+    }
+    
+    .factor-negative {
+        border-left: 4px solid #ef4444;
+        background: #fef2f2;
+    }
+    
+    .factor-neutral {
+        border-left: 4px solid #6b7280;
+        background: #f9fafb;
+    }
+    
+    .historical-chart {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin: 2rem 0;
+    }
+    
+    .feature-tag {
+        display: inline-block;
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin: 0.25rem;
+    }
+    
+    .prediction-timeline {
+        position: relative;
+        padding: 2rem 0;
+    }
+    
+    .timeline-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .timeline-icon {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-weight: bold;
+        color: white;
+        flex-shrink: 0;
+    }
+    
+    .timeline-content {
+        flex-grow: 1;
+        background: white;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .risk-meter {
+        width: 100%;
+        height: 1rem;
+        background: #f3f4f6;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        margin: 1rem 0;
+    }
+    
+    .risk-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22c55e 0%, #eab308 50%, #ef4444 100%);
+        border-radius: 0.5rem;
+        transition: width 0.5s ease;
+    }
+    
+    .stats-comparison {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 2rem 0;
+    }
+    
+    .stat-box {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-box:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-trend {
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .trend-up {
+        color: #22c55e;
+    }
+    
+    .trend-down {
+        color: #ef4444;
+    }
+    
+    .trend-stable {
+        color: #6b7280;
+    }
+    
+    @media (max-width: 768px) {
+        .prediction-value {
+            font-size: 3rem;
+        }
+        
+        .analysis-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-comparison {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- 預測系統標頭 -->
+    <div class="prediction-header">
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="ai-badge mb-4">
+                🔮 AI 表現預測系統
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">
+                {{ page_title }}
+            </h1>
+            <p class="text-lg opacity-90">
+                基於機器學習模型預測球員未來表現趨勢
+            </p>
+        </div>
+    </div>
+    
+    {% if not prediction_error %}
+    <!-- 球員基本資訊 -->
+    <div class="prediction-card">
+        <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6">
+            <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+                <img src="{{ player_info.photo_url|default:'/static/images/default_player.png' }}" 
+                     alt="{{ player_info.fullName }}" 
+                     class="w-20 h-20 rounded-full border-4 border-white">
+                <div>
+                    <h2 class="text-2xl font-bold mb-2">{{ player_info.fullName }}</h2>
+                    <div class="flex flex-wrap gap-4 text-sm opacity-90">
+                        <span>{{ player_info.currentTeam }}</span>
+                        <span>{{ player_info.primaryPosition }}</span>
+                        {% if player_info.birthDate %}
+                        <span>{{ player_info.birthDate }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 預測結果主顯示 -->
+        <div class="prediction-result">
+            <div class="prediction-value" id="predicted-avg">
+                {{ predicted_avg|default:"--" }}
+            </div>
+            <div class="prediction-label">
+                預測打擊率
+            </div>
+            <div class="confidence-indicator">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                信心區間: ±{{ confidence_interval|default:"0.000" }}
+            </div>
+            
+            <!-- 風險評估指示器 -->
+            <div class="mt-4">
+                <div class="text-sm text-gray-600 mb-2">預測可靠度</div>
+                <div class="risk-meter">
+                    <div class="risk-fill" style="width: {% if confidence_interval %}{{ confidence_interval|floatformat:3|add:0.1|mul:500 }}%{% else %}75%{% endif %}"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 分析洞察 -->
+        {% if prediction_analysis %}
+        <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">🧠 AI 分析洞察</h3>
+            
+            <div class="analysis-grid">
+                <!-- 關鍵因素 -->
+                {% if prediction_analysis.key_factors %}
+                <div class="analysis-card factor-positive">
+                    <h4 class="font-bold text-green-700 mb-3 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        正面因素
+                    </h4>
+                    <ul class="space-y-2">
+                        {% for factor in prediction_analysis.key_factors %}
+                        <li class="text-green-700">• {{ factor }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                <!-- 風險因素 -->
+                {% if prediction_analysis.risk_factors %}
+                <div class="analysis-card factor-negative">
+                    <h4 class="font-bold text-red-700 mb-3 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        風險因素
+                    </h4>
+                    <ul class="space-y-2">
+                        {% for factor in prediction_analysis.risk_factors %}
+                        <li class="text-red-700">• {{ factor }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                <!-- 整體展望 -->
+                <div class="analysis-card factor-neutral">
+                    <h4 class="font-bold text-gray-700 mb-3 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                        整體展望
+                    </h4>
+                    <p class="text-gray-700">
+                        {% if prediction_analysis.outlook == 'positive' %}
+                        <span class="text-green-600 font-semibold">樂觀</span> - 預期表現將有所提升
+                        {% elif prediction_analysis.outlook == 'cautious' %}
+                        <span class="text-yellow-600 font-semibold">謹慎</span> - 需要注意潛在風險
+                        {% else %}
+                        <span class="text-gray-600 font-semibold">中性</span> - 預期維持穩定表現
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- 預測特徵展示 -->
+        {% if features_used %}
+        <div class="bg-gray-50 p-6">
+            <h4 class="font-bold text-gray-900 mb-3">🔬 預測模型使用的特徵</h4>
+            <div class="flex flex-wrap gap-2">
+                {% for feature in features_used %}
+                <span class="feature-tag">{{ feature }}</span>
+                {% endfor %}
+            </div>
+            <p class="text-sm text-gray-600 mt-3">
+                我們的模型綜合分析了這些特徵來生成預測結果，每個特徵都經過標準化處理以確保預測的準確性。
+            </p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- 歷史表現對比 -->
+    {% if historical_data %}
+    <div class="historical-chart">
+        <h3 class="text-xl font-bold text-gray-900 mb-4">📈 歷史表現趨勢</h3>
+        
+        <div class="stats-comparison">
+            {% for season_data in historical_data %}
+            <div class="stat-box">
+                <div class="text-lg font-semibold text-gray-600">{{ season_data.season }}</div>
+                <div class="stat-number text-blue-600">
+                    {{ season_data.stat.avg|default:"--" }}
+                </div>
+                <div class="text-sm text-gray-500">打擊率</div>
+                {% if season_data.stat.gamesPlayed %}
+                <div class="text-xs text-gray-400 mt-1">
+                    {{ season_data.stat.gamesPlayed }} 場比賽
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- 圖表容器 -->
+        <div class="mt-6">
+            <canvas id="historicalChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- 預測時間軸 -->
+    <div class="prediction-card">
+        <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-6">🕐 預測流程時間軸</h3>
+            
+            <div class="prediction-timeline">
+                <div class="timeline-item">
+                    <div class="timeline-icon bg-blue-500">1</div>
+                    <div class="timeline-content">
+                        <h4 class="font-bold text-gray-900">數據收集</h4>
+                        <p class="text-gray-600">收集球員歷史統計數據和個人特徵</p>
+                        <div class="text-sm text-blue-600 mt-1">✓ 已完成</div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-icon bg-green-500">2</div>
+                    <div class="timeline-content">
+                        <h4 class="font-bold text-gray-900">特徵工程</h4>
+                        <p class="text-gray-600">標準化和轉換數據以供模型使用</p>
+                        <div class="text-sm text-green-600 mt-1">✓ 已完成</div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-icon bg-purple-500">3</div>
+                    <div class="timeline-content">
+                        <h4 class="font-bold text-gray-900">模型預測</h4>
+                        <p class="text-gray-600">使用機器學習演算法生成預測結果</p>
+                        <div class="text-sm text-purple-600 mt-1">✓ 已完成</div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-icon bg-orange-500">4</div>
+                    <div class="timeline-content">
+                        <h4 class="font-bold text-gray-900">結果分析</h4>
+                        <p class="text-gray-600">分析預測結果並提供詳細解釋</p>
+                        <div class="text-sm text-orange-600 mt-1">✓ 已完成</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- 錯誤狀態 -->
+    <div class="prediction-card">
+        <div class="p-8 text-center">
+            <svg class="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <h3 class="text-xl font-bold text-gray-700 mb-2">預測生成失敗</h3>
+            <p class="text-gray-500 max-w-md mx-auto mb-6">
+                很抱歉，我們無法為這位球員生成表現預測。可能是數據不足或系統暫時無法使用。
+            </p>
+            <a href="{% url 'mlb_app:search_players' %}" 
+               class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-lg transition-colors duration-200">
+                嘗試其他球員
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- 免責聲明 -->
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-6">
+        <div class="flex items-start">
+            <svg class="w-5 h-5 text-yellow-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"/>
+            </svg>
+            <div>
+                <h5 class="font-semibold text-yellow-800">預測僅供參考</h5>
+                <p class="text-sm text-yellow-700 mt-1">
+                    此預測結果基於歷史數據和統計模型生成，實際表現可能受到傷病、狀態、比賽環境等多種因素影響。請勿將此預測作為投資或下注的唯一依據。
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if historical_data %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 歷史表現圖表
+    const ctx = document.getElementById('historicalChart').getContext('2d');
+    const historicalData = {{ historical_data|safe }};
+    
+    // 預測數值動畫
+    const predictedAvgElement = document.getElementById('predicted-avg');
+    if (predictedAvgElement) {
+        const targetValue = parseFloat('{{ predicted_avg }}');
+        if (!isNaN(targetValue)) {
+            animateNumber(predictedAvgElement, 0, targetValue, 2000, 3);
+        }
+    }
+    
+    // 創建歷史趨勢圖表
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [{% for season in historical_data %}'{{ season.season }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: '歷年打擊率',
+                data: [{% for season in historical_data %}{{ season.stat.avg|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 3,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                tension: 0.4,
+                fill: true
+            }, {
+                label: '預測值',
+                data: Array({{ historical_data|length }}).fill(null).concat([{{ predicted_avg }}]),
+                borderColor: 'rgb(239, 68, 68)',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                borderWidth: 3,
+                pointRadius: 8,
+                pointHoverRadius: 10,
+                borderDash: [5, 5],
+                tension: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: '打擊率歷史趨勢與預測'
+                },
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 0.150,
+                    max: 0.400,
+                    title: {
+                        display: true,
+                        text: '打擊率'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: '年份'
+                    }
+                }
+            }
+        }
+    });
+});
+
+function animateNumber(element, start, end, duration, decimals = 0) {
+    const range = end - start;
+    const increment = range / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+            current = end;
+            clearInterval(timer);
+        }
+        element.textContent = current.toFixed(decimals);
+    }, 16);
+}
+</script>
+{% endif %}
+{% endblock %}

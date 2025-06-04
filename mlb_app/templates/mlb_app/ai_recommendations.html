@@ -1,0 +1,458 @@
+{% extends "mlb_app/base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* AI 推薦系統專用樣式 */
+    .ai-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .ai-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        opacity: 0.1;
+    }
+    
+    .ai-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .target-player-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+    
+    .target-player-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .recommendation-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .recommendation-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .recommendation-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    }
+    
+    .recommendation-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .similarity-score {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #3b82f6;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .confidence-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .confidence-high {
+        background: #dcfce7;
+        color: #166534;
+    }
+    
+    .confidence-medium {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .confidence-low {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .player-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #f3f4f6;
+        margin-bottom: 1rem;
+    }
+    
+    .recommendation-reason {
+        background: #f8fafc;
+        border-left: 4px solid #3b82f6;
+        padding: 1rem;
+        margin-top: 1rem;
+        border-radius: 0 0.5rem 0.5rem 0;
+        font-style: italic;
+        color: #64748b;
+    }
+    
+    .stats-preview {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #3b82f6;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+        color: #64748b;
+        text-transform: uppercase;
+        font-weight: 500;
+    }
+    
+    .ai-insights {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin: 2rem 0;
+        border: 1px solid #bae6fd;
+    }
+    
+    .loading-skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+    
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #64748b;
+    }
+    
+    .empty-state svg {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    @media (max-width: 768px) {
+        .recommendation-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .ai-header {
+            padding: 1rem 0;
+            margin-bottom: 1rem;
+        }
+        
+        .target-player-card {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- AI 系統標頭 -->
+    <div class="ai-header">
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="ai-badge">
+                🤖 AI 智慧推薦系統
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">
+                {{ page_title }}
+            </h1>
+            <p class="text-lg opacity-90">
+                使用先進的機器學習演算法，為您找到最相似的球員
+            </p>
+        </div>
+    </div>
+    
+    {% if target_player %}
+    <!-- 目標球員資訊卡片 -->
+    <div class="target-player-card">
+        <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+            <div class="flex-shrink-0">
+                <img src="{{ target_player.photo_url|default:'/static/images/default_player.png' }}" 
+                     alt="{{ target_player.fullName }}" 
+                     class="player-avatar w-24 h-24">
+            </div>
+            <div class="flex-grow">
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">
+                    {{ target_player.fullName }}
+                </h2>
+                <div class="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
+                    <span class="flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        {{ target_player.currentTeam }}
+                    </span>
+                    <span class="flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"/>
+                        </svg>
+                        {{ target_player.primaryPosition }}
+                    </span>
+                    {% if target_player.birthDate %}
+                    <span class="flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zM4 7h12v9H4V7z"/>
+                        </svg>
+                        {{ target_player.birthDate }}
+                    </span>
+                    {% endif %}
+                </div>
+                <p class="text-gray-700">
+                    基於球員的統計數據、守備位置、體能條件等多維度特徵，我們的 AI 系統為您找到了最相似的球員。
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- AI 洞察區塊 -->
+    <div class="ai-insights">
+        <h3 class="text-xl font-bold text-gray-900 mb-3 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+            </svg>
+            AI 分析洞察
+        </h3>
+        <div class="grid md:grid-cols-3 gap-4">
+            <div class="bg-white rounded-lg p-4 border border-blue-200">
+                <div class="text-sm text-blue-600 font-semibold">推薦準確度</div>
+                <div class="text-2xl font-bold text-blue-700">{{ total_recommendations|default:0 }}</div>
+                <div class="text-xs text-gray-500">個高度相似球員</div>
+            </div>
+            <div class="bg-white rounded-lg p-4 border border-blue-200">
+                <div class="text-sm text-blue-600 font-semibold">分析維度</div>
+                <div class="text-2xl font-bold text-blue-700">12+</div>
+                <div class="text-xs text-gray-500">項球員特徵</div>
+            </div>
+            <div class="bg-white rounded-lg p-4 border border-blue-200">
+                <div class="text-sm text-blue-600 font-semibold">算法類型</div>
+                <div class="text-lg font-bold text-blue-700">餘弦相似度</div>
+                <div class="text-xs text-gray-500">機器學習演算法</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 推薦結果 -->
+    {% if recommendations %}
+    <div class="mb-6">
+        <h3 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+            </svg>
+            相似球員推薦
+            <span class="ml-2 text-lg text-gray-500">({{ total_recommendations }} 位)</span>
+        </h3>
+        
+        <div class="recommendation-grid">
+            {% for rec in recommendations %}
+            <div class="recommendation-card">
+                <div class="similarity-score">
+                    {{ rec.similarity_score }}%
+                </div>
+                
+                <div class="text-center mb-4">
+                    <img src="{{ rec.player_info.photo_url|default:'/static/images/default_player.png' }}" 
+                         alt="{{ rec.player_info.fullName }}" 
+                         class="player-avatar mx-auto">
+                    <h4 class="text-xl font-bold text-gray-900 mb-1">
+                        {{ rec.player_info.fullName }}
+                    </h4>
+                    <p class="text-gray-600">{{ rec.player_info.currentTeam }}</p>
+                    <span class="confidence-badge confidence-{{ rec.confidence_level }}">
+                        {% if rec.confidence_level == 'high' %}高度相似{% elif rec.confidence_level == 'medium' %}中度相似{% else %}基本相似{% endif %}
+                    </span>
+                </div>
+                
+                <div class="stats-preview">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ rec.player_info.primaryPosition }}</div>
+                        <div class="stat-label">位置</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ rec.player_info.batSide|truncatechars:3 }}</div>
+                        <div class="stat-label">慣用手</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ rec.player_info.height|default:"--" }}</div>
+                        <div class="stat-label">身高</div>
+                    </div>
+                </div>
+                
+                <div class="recommendation-reason">
+                    <strong>推薦原因：</strong>{{ rec.recommendation_reason }}
+                </div>
+                
+                <div class="mt-4 flex gap-2">
+                    <a href="{% url 'mlb_app:player_detail' rec.player_info.id %}" 
+                       class="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-center py-2 px-4 rounded-lg transition-colors duration-200">
+                        查看詳情
+                    </a>
+                    <a href="{% url 'mlb_app:ai_recommendations' rec.player_info.id %}" 
+                       class="flex-1 bg-gray-500 hover:bg-gray-600 text-white text-center py-2 px-4 rounded-lg transition-colors duration-200">
+                        找相似球員
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- 空狀態 -->
+    <div class="empty-state">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.034 0-3.9.785-5.291 2.073M6.343 6.343A8 8 0 0112 4c1.566 0 3.07.357 4.418 1M4.929 4.929A8.978 8.978 0 003 12c0 1.657.448 3.209 1.232 4.614"/>
+        </svg>
+        <h3 class="text-xl font-bold text-gray-700 mb-2">暫無推薦結果</h3>
+        <p class="text-gray-500 max-w-md mx-auto">
+            很抱歉，我們暫時無法為這位球員找到相似的球員。請稍後再試，或者嘗試搜尋其他球員。
+        </p>
+        <a href="{% url 'mlb_app:search_players' %}" 
+           class="inline-block mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-lg transition-colors duration-200">
+            搜尋其他球員
+        </a>
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <!-- 球員不存在的錯誤狀態 -->
+    <div class="empty-state">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.732 15.5c-.77.833.192 2.5 1.732 2.5z"/>
+        </svg>
+        <h3 class="text-xl font-bold text-gray-700 mb-2">找不到球員資料</h3>
+        <p class="text-gray-500 max-w-md mx-auto">
+            很抱歉，我們找不到您要查詢的球員資料。請檢查球員 ID 是否正確，或者嘗試搜尋其他球員。
+        </p>
+        <a href="{% url 'mlb_app:search_players' %}" 
+           class="inline-block mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-lg transition-colors duration-200">
+            搜尋球員
+        </a>
+    </div>
+    {% endif %}
+    
+    <!-- 技術說明區塊 -->
+    <div class="mt-8 bg-gray-50 rounded-lg p-6">
+        <h4 class="text-lg font-bold text-gray-900 mb-3">🔬 技術說明</h4>
+        <div class="grid md:grid-cols-2 gap-6 text-sm text-gray-600">
+            <div>
+                <h5 class="font-semibold text-gray-800 mb-2">推薦演算法</h5>
+                <p>我們使用餘弦相似度演算法分析球員的多維度特徵，包括身體條件、守備位置、打擊統計等，來計算球員之間的相似程度。</p>
+            </div>
+            <div>
+                <h5 class="font-semibold text-gray-800 mb-2">特徵工程</h5>
+                <p>系統會自動標準化不同類型的統計數據，確保各項指標在相似度計算中具有適當的權重，提高推薦的準確性。</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 載入動畫效果
+document.addEventListener('DOMContentLoaded', function() {
+    // 為推薦卡片添加進入動畫
+    const cards = document.querySelectorAll('.recommendation-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // 為統計數字添加計數動畫
+    const statValues = document.querySelectorAll('.stat-value');
+    statValues.forEach(stat => {
+        const value = stat.textContent;
+        if (!isNaN(value) && value !== '') {
+            animateNumber(stat, 0, parseInt(value), 1000);
+        }
+    });
+});
+
+function animateNumber(element, start, end, duration) {
+    const range = end - start;
+    const stepTime = Math.abs(Math.floor(duration / range));
+    const timer = setInterval(() => {
+        start += (end > start) ? 1 : -1;
+        element.textContent = start;
+        if (start === end) {
+            clearInterval(timer);
+        }
+    }, stepTime);
+}
+</script>
+{% endblock %}

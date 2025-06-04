@@ -1,0 +1,654 @@
+{% extends "mlb_app/base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #581c87 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3Ccircle cx='10' cy='10' r='4'/%3E%3Ccircle cx='50' cy='10' r='4'/%3E%3Ccircle cx='10' cy='50' r='4'/%3E%3Ccircle cx='50' cy='50' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-card.searches::before {
+        background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+    }
+    
+    .stat-card.activity::before {
+        background: linear-gradient(90deg, #10b981, #047857);
+    }
+    
+    .stat-card.engagement::before {
+        background: linear-gradient(90deg, #f59e0b, #d97706);
+    }
+    
+    .stat-card.member::before {
+        background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #1e40af, #7c3aed);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .stat-label {
+        color: #6b7280;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .main-content, .sidebar-content {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+    }
+    
+    .section-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f8fafc;
+        border-radius: 1rem 1rem 0 0;
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+    }
+    
+    .section-content {
+        padding: 1.5rem;
+    }
+    
+    .recommendation-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+    
+    .recommendation-item:hover {
+        background: #f1f5f9;
+        transform: translateX(4px);
+    }
+    
+    .recommendation-icon {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+    
+    .recommendation-content {
+        flex-grow: 1;
+    }
+    
+    .recommendation-title {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+    
+    .recommendation-reason {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: start;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.75rem;
+        font-size: 0.875rem;
+        flex-shrink: 0;
+    }
+    
+    .activity-content {
+        flex-grow: 1;
+    }
+    
+    .activity-text {
+        color: #374151;
+        margin-bottom: 0.25rem;
+    }
+    
+    .activity-time {
+        font-size: 0.75rem;
+        color: #9ca3af;
+    }
+    
+    .engagement-meter {
+        position: relative;
+        width: 100%;
+        height: 1rem;
+        background: #f3f4f6;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        margin: 1rem 0;
+    }
+    
+    .engagement-fill {
+        height: 100%;
+        border-radius: 0.5rem;
+        transition: width 0.5s ease;
+    }
+    
+    .engagement-new .engagement-fill {
+        background: linear-gradient(90deg, #ef4444, #dc2626);
+        width: 20%;
+    }
+    
+    .engagement-low .engagement-fill {
+        background: linear-gradient(90deg, #f59e0b, #d97706);
+        width: 40%;
+    }
+    
+    .engagement-medium .engagement-fill {
+        background: linear-gradient(90deg, #3b82f6, #2563eb);
+        width: 70%;
+    }
+    
+    .engagement-high .engagement-fill {
+        background: linear-gradient(90deg, #10b981, #059669);
+        width: 100%;
+    }
+    
+    .preference-tag {
+        display: inline-block;
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin: 0.25rem 0.25rem 0.25rem 0;
+    }
+    
+    .insight-card {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 1px solid #bae6fd;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .insight-icon {
+        width: 3rem;
+        height: 3rem;
+        background: #3b82f6;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .action-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 1rem;
+        text-decoration: none;
+        color: #374151;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .action-button:hover {
+        background: #f8fafc;
+        border-color: #3b82f6;
+        color: #3b82f6;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .action-icon {
+        margin-right: 0.5rem;
+        font-size: 1.25rem;
+    }
+    
+    @media (max-width: 1024px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- 儀表板標頭 -->
+    <div class="dashboard-header">
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-bold mb-2">
+                        👋 歡迎回來，{{ user.first_name|default:user.username }}！
+                    </h1>
+                    <p class="text-lg opacity-90">
+                        您的個人化 MLB 統計分析中心
+                    </p>
+                </div>
+                <div class="hidden md:block">
+                    <div class="text-right">
+                        <div class="text-sm opacity-75">今日時間</div>
+                        <div class="text-xl font-bold" id="current-time"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if not dashboard_error %}
+    <!-- 統計概覽 -->
+    <div class="stats-grid">
+        <div class="stat-card searches">
+            <div class="stat-number" id="total-searches">{{ user_stats.total_searches|default:0 }}</div>
+            <div class="stat-label">總搜尋次數</div>
+        </div>
+        
+        <div class="stat-card activity">
+            <div class="stat-number">{{ user_stats.peak_activity_hour|default:19 }}:00</div>
+            <div class="stat-label">活躍時段</div>
+        </div>
+        
+        <div class="stat-card engagement">
+            <div class="stat-number">
+                {% if user_stats.engagement_level == 'high' %}高度
+                {% elif user_stats.engagement_level == 'medium' %}中度
+                {% elif user_stats.engagement_level == 'low' %}輕度
+                {% else %}新用戶{% endif %}
+            </div>
+            <div class="stat-label">參與度</div>
+        </div>
+        
+        <div class="stat-card member">
+            <div class="stat-number">{{ user_stats.member_since|default:"2024-01-01" }}</div>
+            <div class="stat-label">加入日期</div>
+        </div>
+    </div>
+    
+    <!-- 主要內容區域 -->
+    <div class="content-grid">
+        <!-- 主內容 -->
+        <div class="main-content">
+            <!-- 個人化推薦 -->
+            <div class="section-header">
+                <h2 class="section-title">
+                    <svg class="w-6 h-6 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                    AI 個人化推薦
+                </h2>
+            </div>
+            
+            <div class="section-content">
+                {% if personalized_content.custom_insights %}
+                    {% for insight in personalized_content.custom_insights %}
+                    <div class="recommendation-item">
+                        <div class="recommendation-icon bg-blue-100 text-blue-600">
+                            🎯
+                        </div>
+                        <div class="recommendation-content">
+                            <div class="recommendation-title">{{ insight }}</div>
+                            <div class="recommendation-reason">基於您的使用習慣推薦</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="recommendation-item">
+                    <div class="recommendation-icon bg-gray-100 text-gray-600">
+                        🚀
+                    </div>
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">開始探索 MLB 數據</div>
+                        <div class="recommendation-reason">搜尋您感興趣的球員或球隊</div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if personalized_content.suggested_teams %}
+                <h4 class="font-bold text-gray-900 mt-6 mb-3">推薦球隊</h4>
+                {% for team in personalized_content.suggested_teams %}
+                <div class="recommendation-item">
+                    <div class="recommendation-icon bg-green-100 text-green-600">
+                        ⚾
+                    </div>
+                    <div class="recommendation-content">
+                        <div class="recommendation-title">{{ team.team_name }}</div>
+                        <div class="recommendation-reason">{{ team.reason }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+            
+            <!-- 使用者洞察 -->
+            <div class="section-header">
+                <h2 class="section-title">
+                    <svg class="w-6 h-6 mr-2 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    個人使用洞察
+                </h2>
+            </div>
+            
+            <div class="section-content">
+                <div class="insight-card">
+                    <div class="insight-icon">
+                        📊
+                    </div>
+                    <h4 class="font-bold text-blue-900 mb-2">搜尋模式分析</h4>
+                    <p class="text-blue-800 mb-3">
+                        您最常搜尋的類型是「{{ user_stats.favorite_search_type|default:"球員" }}」，
+                        建議您也可以嘗試探索其他功能來獲得更全面的 MLB 體驗。
+                    </p>
+                    
+                    <div class="engagement-meter engagement-{{ user_stats.engagement_level|default:'new' }}">
+                        <div class="engagement-fill"></div>
+                    </div>
+                    
+                    <div class="text-sm text-blue-700">
+                        參與度等級: 
+                        {% if user_stats.engagement_level == 'high' %}
+                            高度活躍 - 您是我們的超級用戶！
+                        {% elif user_stats.engagement_level == 'medium' %}
+                            中度活躍 - 保持良好的使用習慣
+                        {% elif user_stats.engagement_level == 'low' %}
+                            輕度使用 - 歡迎更多探索我們的功能
+                        {% else %}
+                            新用戶 - 歡迎來到 MLB 統計世界！
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- 偏好分析 -->
+                {% if user_profile.preferred_teams %}
+                <div class="mt-6">
+                    <h4 class="font-bold text-gray-900 mb-3">您關注的球隊</h4>
+                    <div class="flex flex-wrap gap-2">
+                        {% for team in user_profile.preferred_teams %}
+                        <span class="preference-tag">{{ team }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- 側邊欄 -->
+        <div class="sidebar-content">
+            <!-- 最近活動 -->
+            <div class="section-header">
+                <h3 class="section-title">
+                    <svg class="w-5 h-5 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                    </svg>
+                    最近活動
+                </h3>
+            </div>
+            
+            <div class="section-content">
+                {% if recent_searches %}
+                    {% for search in recent_searches|slice:":5" %}
+                    <div class="activity-item">
+                        <div class="activity-icon 
+                            {% if search.search_type == 'player' %}bg-blue-100 text-blue-600
+                            {% elif search.search_type == 'team' %}bg-green-100 text-green-600
+                            {% else %}bg-purple-100 text-purple-600{% endif %}">
+                            {% if search.search_type == 'player' %}👤
+                            {% elif search.search_type == 'team' %}⚾
+                            {% else %}🔍{% endif %}
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">
+                                搜尋了「{{ search.search_query }}」
+                            </div>
+                            <div class="activity-time">
+                                {% if search.search_time %}
+                                {{ search.search_time|date:"m月d日 H:i" }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="text-center text-gray-500 py-8">
+                    <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <p>還沒有活動記錄</p>
+                    <p class="text-sm">開始搜尋來建立您的活動歷史</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- 快速操作 -->
+    <div class="main-content">
+        <div class="section-header">
+            <h2 class="section-title">
+                <svg class="w-6 h-6 mr-2 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                </svg>
+                快速操作
+            </h2>
+        </div>
+        
+        <div class="section-content">
+            <div class="quick-actions">
+                <a href="{% url 'mlb_app:search_players' %}" class="action-button">
+                    <span class="action-icon">🔍</span>
+                    搜尋球員
+                </a>
+                
+                <a href="{% url 'mlb_app:games_by_date' %}" class="action-button">
+                    <span class="action-icon">📅</span>
+                    查看比賽
+                </a>
+                
+                <a href="#" class="action-button" onclick="discoverRandomPlayer()">
+                    <span class="action-icon">🎲</span>
+                    隨機發現
+                </a>
+                
+                <a href="{% url 'mlb_app:index' %}" class="action-button">
+                    <span class="action-icon">🏠</span>
+                    返回首頁
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- 錯誤狀態 -->
+    <div class="main-content">
+        <div class="section-content text-center py-12">
+            <svg class="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <h3 class="text-xl font-bold text-gray-700 mb-2">載入儀表板失敗</h3>
+            <p class="text-gray-500 max-w-md mx-auto mb-6">
+                很抱歉，我們無法載入您的個人化儀表板。請稍後再試。
+            </p>
+            <a href="{% url 'mlb_app:index' %}" 
+               class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-lg transition-colors duration-200">
+                返回首頁
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 更新當前時間
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('zh-TW', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+        const timeElement = document.getElementById('current-time');
+        if (timeElement) {
+            timeElement.textContent = timeString;
+        }
+    }
+    
+    updateTime();
+    setInterval(updateTime, 60000); // 每分鐘更新一次
+    
+    // 統計數字動畫
+    const totalSearches = document.getElementById('total-searches');
+    if (totalSearches) {
+        const targetValue = parseInt(totalSearches.textContent);
+        if (!isNaN(targetValue)) {
+            animateNumber(totalSearches, 0, targetValue, 1500);
+        }
+    }
+    
+    // 為活動項目添加進入動畫
+    const activityItems = document.querySelectorAll('.activity-item, .recommendation-item');
+    activityItems.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-20px)';
+        setTimeout(() => {
+            item.style.transition = 'all 0.5s ease';
+            item.style.opacity = '1';
+            item.style.transform = 'translateX(0)';
+        }, index * 100);
+    });
+});
+
+function animateNumber(element, start, end, duration) {
+    const range = end - start;
+    const stepTime = Math.abs(Math.floor(duration / range));
+    const timer = setInterval(() => {
+        start += (end > start) ? 1 : -1;
+        element.textContent = start;
+        if (start === end) {
+            clearInterval(timer);
+        }
+    }, stepTime);
+}
+
+function discoverRandomPlayer() {
+    const popularPlayers = [
+        'Shohei Ohtani', 'Aaron Judge', 'Mookie Betts', 
+        'Fernando Tatis Jr.', 'Mike Trout', 'Ronald Acuna Jr.'
+    ];
+    const randomPlayer = popularPlayers[Math.floor(Math.random() * popularPlayers.length)];
+    window.location.href = `/search/?q=${encodeURIComponent(randomPlayer)}`;
+}
+</script>
+{% endblock %}

@@ -21,6 +21,7 @@ URL 設計原則：
 
 from django.urls import path
 from . import views
+from . import ai_views  # 導入 AI 功能視圖
 from django.contrib.auth import views as auth_views # For Login/Logout
 
 # 應用程式的命名空間
@@ -67,6 +68,25 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='mlb_app/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'), # Redirect to home page after logout
     
+    # AI 功能相關 URL
+    # 
+    # AI 球員推薦
+    # URL: /players/123/ai-recommendations/
+    # 功能: 使用機器學習演算法為指定球員推薦相似球員
+    # 例如: /players/660271/ai-recommendations/
+    path('players/<int:player_id>/ai-recommendations/', ai_views.ai_player_recommendations, name='ai_recommendations'),
+    
+    # AI 表現預測
+    # URL: /players/123/prediction/
+    # 功能: 使用預測模型預測球員未來表現
+    # 例如: /players/660271/prediction/
+    path('players/<int:player_id>/prediction/', ai_views.ai_performance_prediction, name='ai_prediction'),
+    
+    # 使用者個人化儀表板
+    # URL: /dashboard/
+    # 功能: 顯示個人化的使用者儀表板，需要登入
+    path('dashboard/', ai_views.user_dashboard, name='user_dashboard'),
+    
     # API 端點 - 這些 URL 返回 JSON 數據，供前端 JavaScript 使用
     # 
     # 比賽資訊 API
@@ -80,6 +100,13 @@ urlpatterns = [
     # 功能: 返回 JSON 格式的球員搜尋結果
     # 用途: 供自動完成功能使用
     path('api/players/search/', views.api_player_search_json, name='api_player_search'),
+    
+    # AI 洞察 API
+    # URL: /api/ai-insights/
+    # 功能: 返回 AI 分析結果，支援多種洞察類型
+    # 用途: 供前端 JavaScript 動態加載数據使用
+    # 例如: /api/ai-insights/?type=trends
+    path('api/ai-insights/', ai_views.ai_insights_api, name='api_ai_insights'),
     
     # 靜態頁面
     # 

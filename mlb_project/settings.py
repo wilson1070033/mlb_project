@@ -55,6 +55,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',     # 訊息框架
     'django.contrib.staticfiles',  # 靜態文件處理
     
+    # 第三方套件 (如果需要的話)
+    # 'rest_framework',            # Django REST Framework (用於 API 開發)
+    # 'corsheaders',               # CORS 支援 (用於前後端分離)
+    
     # 我們自己開發的應用程式
     # 這是我們專門為 MLB 統計查詢功能開發的應用程式
     'mlb_app',
@@ -71,6 +75,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware', # 認證中介軟體
     'django.contrib.messages.middleware.MessageMiddleware',     # 訊息中介軟體
     'django.middleware.clickjacking.XFrameOptionsMiddleware',   # 點擊劫持防護
+    
+    # 我們自定義的安全中介軟體
+    'mlb_app.middleware.SecurityMiddleware',             # 自定義安全防護
+    'mlb_app.middleware.CSRFEnhancementMiddleware',      # 增強 CSRF 保護
 ]
 
 # URL 配置的根模組
@@ -209,8 +217,140 @@ MLB_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
+        'LOCATION': 'mlb-stats-cache',
         'TIMEOUT': 300,  # 5 分鐘快取
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,
+            'CULL_FREQUENCY': 3,
+        }
+    },
+    'api_cache': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'mlb-api-cache',
+        'TIMEOUT': 60,   # 1 分鐘 API 快取
+        'OPTIONS': {
+            'MAX_ENTRIES': 500,
+            'CULL_FREQUENCY': 2,
+        }
+    },
+    'ml_cache': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'mlb-ml-cache',
+        'TIMEOUT': 3600,  # 1 小時 ML 模型快取
+        'OPTIONS': {
+            'MAX_ENTRIES': 100,
+            'CULL_FREQUENCY': 2,
+        }
+    }
+}
+
+# 日誌設定
+# 日誌將幫助我們追蹤問題和監控應用程式運行狀態
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{levelname}] {asctime} {name} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '[{levelname}] {message}',
+            'style': '{',
+        },
+        'security': {
+            'format': '[SECURITY] {asctime} {levelname} {message}',
+            'style': '{',
+        }
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'mlb_app.log',
+            'formatter': 'verbose'
+        },
+        'security_file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'security.log',
+            'formatter': 'security'
+        }
+    },
+    'loggers': {
+        'mlb_app': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'mlb_app.security': {
+            'handlers': ['console', 'security_file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'mlb_app.ml_engine': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        }
+    }
+}
+
+# 安全設定增強
+# 這些設定提供額外的安全防護
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+# 在正式環境中啟用 HTTPS 相關設定
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+# 機器學習和 AI 相關設定
+# 這些設定控制我們的 AI 功能
+ML_SETTINGS = {
+    # 推薦系統設定
+    'RECOMMENDATION_ENGINE': {
+        'MODEL_UPDATE_INTERVAL_SECONDS': 3600,  # 1小時更新一次
+        'CACHE_TIMEOUT': 1800,                  # 30分鐘快取
+        'MAX_RECOMMENDATIONS': 8,               # 最大推薦數量
+        'MIN_SIMILARITY_THRESHOLD': 0.5,        # 最小相似度闾值
+    },
+    # 表現預測設定
+    'PERFORMANCE_PREDICTION': {
+        'MODEL_TYPE': 'linear_regression',
+        'CONFIDENCE_THRESHOLD': 0.7,
+        'HISTORICAL_YEARS': 5,
+        'CACHE_TIMEOUT': 3600,
+    },
+    # 使用者行為分析設定
+    'USER_BEHAVIOR': {
+        'ANALYSIS_WINDOW_DAYS': 30,
+        'MIN_SEARCHES_FOR_ANALYSIS': 5,
+        'ENGAGEMENT_LEVELS': {
+            'high': 50,
+            'medium': 20,
+            'low': 5
+        }
+    }
+}
+
+# 數據視覺化設定
+VISUALIZATION_SETTINGS = {
+    'CHARTS': {
+        'DEFAULT_COLORS': [
+            '#3b82f6', '#ef4444', '#22c55e', '#f59e0b', 
+            '#8b5cf6', '#06b6d4', '#f97316', '#84cc16'
+        ],
+        'ANIMATION_DURATION': 1000,
+        'MAX_DATA_POINTS': 50,
     }
 }
 
