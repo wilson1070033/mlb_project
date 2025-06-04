@@ -1,0 +1,129 @@
+{% extends 'mlb_app/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - MLB 統計查詢系統{% endblock %}
+
+{% block description %}查看 {{ team.name }} 球隊的詳細資訊，包括球隊歷史、球場、聯盟和分區等。{% endblock %}
+
+{% block content %}
+<div class="p-4">
+    <!-- Team Header -->
+    <div class="bg-gradient-to-r from-blue-700 to-indigo-600 rounded-xl text-white p-8 mb-8 shadow-xl">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row items-center gap-6">
+                <div class="flex-shrink-0">
+                    {# Placeholder for team logo - could use an SVG or an image if available #}
+                    <div class="w-24 h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 256 256" class="text-white">
+                            <path d="M160,16H96A16,16,0,0,0,80,32V224a16,16,0,0,0,16,16h64a16,16,0,0,0,16-16V32A16,16,0,0,0,160,16Zm0,208H96V32h64ZM48,208a16,16,0,0,1-16-16V64A16,16,0,0,1,48,48H72V64H48V192H72v16ZM208,48H184V64h24V192H184v16h24a16,16,0,0,0,16-16V64A16,16,0,0,0,208,48Z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flex-1 text-center md:text-left">
+                    <h1 class="text-4xl font-bold mb-2">{{ team.name }}</h1>
+                    {% if team.abbreviation %}
+                        <p class="text-xl opacity-90">({{ team.abbreviation }})</p>
+                    {% endif %}
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <a href="{% url 'mlb_app:team_roster' team_id=team.mlb_id %}"
+                       class="px-6 py-3 bg-white text-blue-700 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg shadow-md hover:shadow-lg">
+                        查看球隊名單
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Details Grid -->
+    <div class="container mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Basic Info Card -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-lg p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6 border-b pb-3">基本資訊</h2>
+                <div class="space-y-4 text-gray-700">
+                    <div class="flex justify-between">
+                        <span class="font-medium">球隊ID (MLB ID):</span>
+                        <span class="text-gray-900">{{ team.mlb_id }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-medium">球隊全名:</span>
+                        <span class="text-gray-900">{{ team.name }}</span>
+                    </div>
+                    {% if team.team_code %}
+                    <div class="flex justify-between">
+                        <span class="font-medium">球隊代碼:</span>
+                        <span class="text-gray-900">{{ team.team_code }}</span>
+                    </div>
+                    {% endif %}
+                    {% if team.abbreviation %}
+                    <div class="flex justify-between">
+                        <span class="font-medium">縮寫:</span>
+                        <span class="text-gray-900">{{ team.abbreviation }}</span>
+                    </div>
+                    {% endif %}
+                    {% if team.first_year_of_play %}
+                    <div class="flex justify-between">
+                        <span class="font-medium">創立年份:</span>
+                        <span class="text-gray-900">{{ team.first_year_of_play }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- League & Division Card -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-lg p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6 border-b pb-3">聯盟與分區</h2>
+                <div class="space-y-4 text-gray-700">
+                    {% if team.league_name %}
+                    <div class="flex justify-between">
+                        <span class="font-medium">聯盟:</span>
+                        <span class="text-gray-900">{{ team.league_name }}</span>
+                    </div>
+                    {% else %}
+                    <div class="flex justify-between">
+                        <span class="font-medium">聯盟:</span>
+                        <span class="text-gray-500">N/A</span>
+                    </div>
+                    {% endif %}
+                    {% if team.division_name %}
+                    <div class="flex justify-between">
+                        <span class="font-medium">分區:</span>
+                        <span class="text-gray-900">{{ team.division_name }}</span>
+                    </div>
+                    {% else %}
+                    <div class="flex justify-between">
+                        <span class="font-medium">分區:</span>
+                        <span class="text-gray-500">N/A</span>
+                    </div>
+                    {% endif %}
+                     <div class="flex justify-between">
+                        <span class="font-medium">運動項目:</span>
+                        <span class="text-gray-900">{{ team.sport_name|default:"棒球" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Venue Info Card -->
+        {% if team.venue_name %}
+        <div class="bg-white rounded-xl border border-gray-200 shadow-lg p-6 mt-6">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6 border-b pb-3">球場資訊</h2>
+            <div class="space-y-4 text-gray-700">
+                <div class="flex justify-between">
+                    <span class="font-medium">球場名稱:</span>
+                    <span class="text-gray-900">{{ team.venue_name }}</span>
+                </div>
+                {% if team.location_city %}
+                <div class="flex justify-between">
+                    <span class="font-medium">城市:</span>
+                    <span class="text-gray-900">{{ team.location_city }}</span>
+                </div>
+                {% endif %}
+                {# Add more venue details if available in model, e.g., capacity, address #}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

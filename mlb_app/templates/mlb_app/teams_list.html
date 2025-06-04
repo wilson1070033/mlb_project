@@ -1,0 +1,77 @@
+{% extends 'mlb_app/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - MLB 統計查詢系統{% endblock %}
+
+{% block description %}查看所有 MLB 球隊的列表。點擊球隊名稱以獲取更多詳細資訊。{% endblock %}
+
+{% block content %}
+<div class="p-4">
+    <!-- Page Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-green-500 text-white p-6 rounded-xl shadow-lg mb-8">
+        <div class="container mx-auto">
+            <h1 class="text-3xl font-bold mb-2">{{ page_title }}</h1>
+            <p class="text-lg opacity-90">探索所有美國職棒大聯盟的球隊。</p>
+        </div>
+    </div>
+
+    <!-- Teams Grid -->
+    <div class="container mx-auto">
+        {% if teams %}
+            <div class="mb-4 text-sm text-gray-600">
+                共找到 {{ total_teams }} 支球隊。
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for team in teams %}
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-300">
+                    <div class="p-6">
+                        <h2 class="text-xl font-semibold text-blue-700 mb-2">
+                            <a href="{% url 'mlb_app:team_detail' team_id=team.mlb_id %}" class="hover:text-blue-500 hover:underline">
+                                {{ team.name }}
+                            </a>
+                        </h2>
+                        <div class="space-y-2 text-sm text-gray-600">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="text-gray-400 mr-2 shrink-0" viewBox="0 0 256 256"><path d="M128,64a64,64,0,1,0,64,64A64.07,64.07,0,0,0,128,64Zm0,112a48,48,0,1,1,48-48A48.05,48.05,0,0,1,128,176Z"></path></svg>
+                                ID: {{ team.mlb_id|default:"N/A" }}
+                            </div>
+                            {% if team.abbreviation %}
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="text-gray-400 mr-2 shrink-0" viewBox="0 0 256 256"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM160,128H96V96h64Zm48,64H48V64H208V192Z"></path></svg>
+                                縮寫: {{ team.abbreviation }}
+                            </div>
+                            {% endif %}
+                            {% if team.venue_name %}
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="text-gray-400 mr-2 shrink-0" viewBox="0 0 256 256"><path d="M128,64a40,40,0,0,0-40,40c0,28.52,32.26,72.37,35.78,77.15a8,8,0,0,0,8.44,0C135.74,176.37,168,132.52,168,104A40,40,0,0,0,128,64Zm0,56a16,16,0,1,1,16-16A16,16,0,0,1,128,120Z"></path></svg>
+                                球場: {{ team.venue_name }}
+                            </div>
+                            {% endif %}
+                            {% if team.league_name %}
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="text-gray-400 mr-2 shrink-0" viewBox="0 0 256 256"><path d="M240,128a15.87,15.87,0,0,0-9.42-14.79l-72-32A16,16,0,0,0,144,96v16H112V96a16,16,0,0,0-14.58-15.21l-72,16A16,16,0,0,0,8,112v80a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16Zm-16,64H24V118.17l64-14.22V192Zm0-85.17L160,98.61V192h64Z"></path></svg>
+                                聯盟: {{ team.league_name }} ({{ team.division_name|default:"N/A" }})
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-b-xl border-t border-gray-200">
+                         <a href="{% url 'mlb_app:team_detail' team_id=team.mlb_id %}" class="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
+                            查看詳情 &raquo;
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="text-gray-400 mx-auto mb-4" viewBox="0 0 256 256">
+                    <path d="M160,16H96A16,16,0,0,0,80,32V224a16,16,0,0,0,16,16h64a16,16,0,0,0,16-16V32A16,16,0,0,0,160,16Zm0,208H96V32h64ZM48,208a16,16,0,0,1-16-16V64A16,16,0,0,1,48,48H72V64H48V192H72v16ZM208,48H184V64h24V192H184v16h24a16,16,0,0,0,16-16V64A16,16,0,0,0,208,48Z"></path>
+                </svg>
+                <h2 class="text-xl font-semibold text-gray-700 mb-2">目前沒有球隊資料</h2>
+                <p class="text-gray-500">請稍後再回來查看，或嘗試同步球隊數據。</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -175,13 +175,66 @@
                 <!-- Recent Performance -->
                 <div class="mt-6">
                     <h3 class="text-lg font-bold text-[#0d141c] mb-4">近期表現</h3>
-                    <div class="bg-gray-50 rounded-lg p-6 text-center">
-                        {% if recent_performance_available %}
-                            <p class="text-[#49739c]">載入最新比賽表現數據中...</p>
-                        {% else %}
-                            <p class="text-[#49739c]">近期比賽表現數據即將推出。</p>
-                        {% endif %}
-                    </div>
+                    {% if recent_performance_available and recent_game_logs %}
+                        <div class="bg-gray-50 rounded-lg p-1 overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-100">
+                                    <tr class="border-b border-[#e7edf4]">
+                                        <th class="text-left py-3 px-4 text-[#0d141c] font-medium">日期</th>
+                                        <th class="text-left py-3 px-4 text-[#0d141c] font-medium">對手</th>
+                                        {% if quick_stats_type == 'pitching' %}
+                                            <th class="text-right py-3 px-4 text-[#0d141c] font-medium">IP</th>
+                                            <th class="text-right py-3 px-4 text-[#0d141c] font-medium">H</th>
+                                            <th class="text-right py-3 px-4 text-[#0d141c] font-medium">R</th>
+                                            <th class="text-right py-3 px-4 text-[#0d141c] font-medium">ER</th>
+                                            <th class="text-right py-3 px-4 text-[#0d141c] font-medium">BB</th>
+                                            <th class="text-right py-3 px-4 text-[#0d141c] font-medium">SO</th>
+                                            <th class="text-right py-3 px-4 text-[#0d141c] font-medium">ERA</th>
+                                        {% else %} {# Default to Hitter stats #}
+                                            <th class="text-right py-3 px-4 text-[#0d141c] font-medium">AB</th>
+                                            <th class="text-right py-3 px-4 text-[#0d141c] font-medium">R</th>
+                                            <th class="text-right py-3 px-4 text-[#0d141c] font-medium">H</th>
+                                            <th class="text-right py-3 px-4 text-[#0d141c] font-medium">RBI</th>
+                                            <th class="text-right py-3 px-4 text-[#0d141c] font-medium">HR</th>
+                                            <th class="text-right py-3 px-4 text-[#0d141c] font-medium">BB</th>
+                                            <th class="text-right py-3 px-4 text-[#0d141c] font-medium">SO</th>
+                                            <th class="text-right py-3 px-4 text-[#0d141c] font-medium">AVG</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in recent_game_logs %}
+                                    <tr class="border-b border-[#e7edf4] hover:bg-gray-100">
+                                        <td class="py-3 px-4 text-[#0d141c] font-medium">{{ log.game_date|date:"Y-m-d" }}</td>
+                                        <td class="py-3 px-4 text-[#49739c]">{{ log.opponent_team_abbr|default:"N/A" }}</td>
+                                        {% if quick_stats_type == 'pitching' %}
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ log.innings_pitched|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ log.hits_allowed|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ log.runs_allowed|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ log.earned_runs|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ log.walks_issued|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ log.strikeouts_thrown|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ log.era|floatformat:2|default:"-" }}</td>
+                                        {% else %} {# Default to Hitter stats #}
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ log.at_bats|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ log.runs_scored|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ log.hits|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ log.rbi|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ log.home_runs|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ log.walks|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#49739c]">{{ log.strikeouts|default:"-" }}</td>
+                                            <td class="py-3 px-4 text-right text-[#0d141c] font-medium">{{ log.batting_average|floatformat:3|default:"-" }}</td>
+                                        {% endif %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="bg-gray-50 rounded-lg p-6 text-center">
+                            <p class="text-[#49739c]">沒有最近的比賽記錄。</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             

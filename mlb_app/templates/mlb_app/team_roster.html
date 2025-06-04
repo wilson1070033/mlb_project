@@ -1,0 +1,75 @@
+{% extends 'mlb_app/base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - MLB 統計查詢系統{% endblock %}
+
+{% block description %}查看 {{ team.name }} 球隊的完整球員名單，包括球員位置和連結到他們的詳細統計資料。{% endblock %}
+
+{% block content %}
+<div class="p-4">
+    <!-- Page Header -->
+    <div class="bg-gradient-to-r from-gray-700 to-gray-800 text-white p-6 rounded-xl shadow-lg mb-8">
+        <div class="container mx-auto">
+            <h1 class="text-3xl font-bold mb-1">{{ team.name }}</h1>
+            <p class="text-xl opacity-90">{{ page_title }}</p>
+            <div class="mt-4">
+                <a href="{% url 'mlb_app:team_detail' team_id=team.mlb_id %}"
+                   class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm">
+                    &laquo; 返回球隊詳細資訊
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Roster Table -->
+    <div class="container mx-auto">
+        {% if players %}
+            <div class="mb-4 text-sm text-gray-600">
+                共 {{ total_players }} 位球員。
+            </div>
+            <div class="bg-white rounded-xl border border-gray-200 shadow-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-100 border-b border-gray-200">
+                            <tr>
+                                <th class="text-left py-3 px-5 text-gray-700 font-semibold">姓名</th>
+                                <th class="text-left py-3 px-5 text-gray-700 font-semibold">位置</th>
+                                <th class="text-right py-3 px-5 text-gray-700 font-semibold">MLB ID</th>
+                                <th class="text-center py-3 px-5 text-gray-700 font-semibold">狀態</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for player in players %}
+                            <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                                <td class="py-3 px-5 text-gray-800">
+                                    <a href="{% url 'mlb_app:player_detail' player_id=player.mlb_id %}" class="text-blue-600 hover:text-blue-800 hover:underline font-medium">
+                                        {{ player.full_name|default:"N/A" }}
+                                    </a>
+                                </td>
+                                <td class="py-3 px-5 text-gray-600">{{ player.primary_position|default:"N/A" }}</td>
+                                <td class="py-3 px-5 text-right text-gray-600">{{ player.mlb_id|default:"N/A" }}</td>
+                                <td class="py-3 px-5 text-center">
+                                    {% if player.active %}
+                                        <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">現役</span>
+                                    {% else %}
+                                        <span class="px-2 py-1 text-xs font-semibold text-red-700 bg-red-100 rounded-full">非現役</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center py-10 bg-white rounded-xl border border-gray-200 shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" fill="currentColor" class="text-gray-400 mx-auto mb-3" viewBox="0 0 256 256">
+                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM74.08,197.5a64,64,0,0,1,107.84,0,87.83,87.83,0,0,1-107.84,0ZM96,120a32,32,0,1,1,32,32A32,32,0,0,1,96,120Zm97.76,66.41a79.66,79.66,0,0,0-36.06-28.75,48,48,0,1,0-59.4,0A79.66,79.66,0,0,0,56.24,186.41,88,88,0,1,1,193.76,186.41Z"></path>
+                </svg>
+                <h2 class="text-xl font-semibold text-gray-700 mb-2">該球隊目前沒有球員資料</h2>
+                <p class="text-gray-500">請確認球隊資料是否已同步，或稍後再試。</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
