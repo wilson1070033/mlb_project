@@ -1,0 +1,14 @@
+[INFO] 2025-06-04 10:55:41,036 mlb_app.utils 41144 20988 獲取到 15 場比賽資訊: 2025-06-04
+[INFO] 2025-06-04 10:55:42,192 mlb_app.utils 41144 20988 找到 1 位球員: Shohei Ohtani
+[INFO] 2025-06-04 10:55:42,857 mlb_app.utils 41144 20988 找到 1 位球員: Aaron Judge
+[INFO] 2025-06-04 10:55:44,018 mlb_app.utils 41144 20988 找到 1 位球員: Mookie Betts
+[INFO] 2025-06-04 10:55:45,204 mlb_app.utils 41144 20988 找到 1 位球員: Fernando Tatis Jr.
+[INFO] 2025-06-04 10:55:45,204 mlb_app.views 41144 20988 首頁載入成功：15 場比賽，4 位熱門球員
+[INFO] 2025-06-04 10:55:50,438 mlb_app.views 41144 28360 首頁載入成功：15 場比賽，4 位熱門球員
+[INFO] 2025-06-04 11:06:17,364 mlb_app.utils 29900 15096 獲取到 15 場比賽資訊: 2025-06-04
+[INFO] 2025-06-04 11:06:18,070 mlb_app.utils 29900 15096 找到 1 位球員: Shohei Ohtani
+[INFO] 2025-06-04 11:06:18,877 mlb_app.utils 29900 15096 找到 1 位球員: Aaron Judge
+[INFO] 2025-06-04 11:06:19,699 mlb_app.utils 29900 15096 找到 1 位球員: Mookie Betts
+[INFO] 2025-06-04 11:06:20,503 mlb_app.utils 29900 15096 找到 1 位球員: Fernando Tatis Jr.
+[INFO] 2025-06-04 11:06:20,503 mlb_app.views 29900 15096 首頁載入成功：15 場比賽，4 位熱門球員
+[INFO] 2025-06-04 11:06:33,766 mlb_app.views 29900 15096 首頁載入成功：15 場比賽，4 位熱門球員
