@@ -461,7 +461,7 @@ class Command(BaseCommand):
                 security_warnings.append('未啟用 XSS 過濾器')
             
             # 檢查中介軟體
-            middleware = getattr(settings, 'MIDDLEWARE', [])\n            
+            middleware = getattr(settings, 'MIDDLEWARE', [])
             security_middleware_found = any('SecurityMiddleware' in mw for mw in middleware)
             if not security_middleware_found:
                 security_warnings.append('未發現自定義安全中介軟體')
