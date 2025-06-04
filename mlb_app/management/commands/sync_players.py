@@ -23,6 +23,7 @@ from typing import Dict, List, Any, Optional
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
+from datetime import timedelta
 from django.core.cache import cache
 
 from mlb_app.models import Player, Team
@@ -331,7 +332,7 @@ class Command(BaseCommand):
             # 檢查是否需要更新
             if not force_update:
                 # 如果最近已更新過，跳過
-                if (timezone.now() - player.updated_at).hours < 24:
+                if timezone.now() - player.updated_at < timedelta(hours=24):
                     return False, False
             
             # 更新球員資訊
