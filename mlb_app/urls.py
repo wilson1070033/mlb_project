@@ -119,6 +119,7 @@ urlpatterns = [
     # URL: /help/
     # 功能: 顯示使用說明和常見問題
     path('help/', views.help_page, name='help'),
+    path("demo/frontend/", views.frontend_demo, name="frontend_demo"),
 
     # 球隊列表
     # URL: /teams/
